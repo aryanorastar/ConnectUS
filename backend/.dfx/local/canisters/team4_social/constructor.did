@@ -1,0 +1,29 @@
+type User = 
+ record {
+   postsCount: nat;
+   "principal": principal;
+   tokenBalance: nat;
+   totalRewards: nat;
+   username: text;
+ };
+type Post = 
+ record {
+   author: principal;
+   content: text;
+   id: nat;
+   likes: nat;
+   rewards: nat;
+   timestamp: int;
+ };
+service : {
+  createPost: (content: text) -> (nat);
+  getMyProfile: () -> (opt User);
+  getPlatformStats: () -> (record {
+                             totalPosts: nat;
+                             totalUsers: nat;
+                           }) query;
+  getPosts: () -> (vec Post) query;
+  getUserProfile: (userPrincipal: principal) -> (opt User) query;
+  likePost: (postId: nat) -> (bool);
+  transferTokens: (to: principal, amount: nat) -> (bool);
+}

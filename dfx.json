@@ -1,0 +1,42 @@
+{
+  "canisters": {
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
+    },
+    "team4_social": {
+      "main": "backend/Main.mo",
+      "type": "motoko"
+    },
+    "frontend": {
+      "dependencies": ["team4_social", "internet_identity"],
+      "frontend": {
+        "entrypoint": "index.html"
+      },
+      "source": ["dist"],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8001",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://ic0.app"],
+      "type": "persistent"
+    }
+  }
+}
