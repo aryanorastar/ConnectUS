@@ -5,6 +5,10 @@ import { PostCard } from '@/components/PostCard';
 import { TokenRewards } from '@/components/TokenRewards';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TrendingUp, Clock, Users, MessageCircle, Share2, Heart, Gift } from 'lucide-react';
 
 interface Post {
   id: number;
@@ -16,9 +20,17 @@ interface Post {
   mediaUrl: string;
 }
 
+type FeedFilter = 'newest' | 'trending' | 'following';
+
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [networkStats, setNetworkStats] = useState({
+    totalPosts: 0,
+    activeUsers: 0,
+    cuDistributed: 0
+  });
+  const [currentFilter, setCurrentFilter] = useState<FeedFilter>('newest');
   const { toast } = useToast();
   const [openComments, setOpenComments] = useState<number | null>(null);
   const [comments, setComments] = useState<Record<number, any[]>>({});
@@ -40,24 +52,59 @@ const Feed = () => {
         rewards: Number(post.rewards),
         mediaUrl: post.mediaUrl,
       }));
-      setPosts(mapped.reverse());
-    } catch (e) {
-      // Optionally handle error
+      
+      // Sort posts based on current filter
+      let sortedPosts = mapped.reverse();
+      switch (currentFilter) {
+        case 'trending':
+          sortedPosts = sortedPosts.sort((a, b) => (b.likes + b.rewards) - (a.likes + a.rewards));
+          break;
+        case 'newest':
+          sortedPosts = sortedPosts.sort((a, b) => b.timestamp - a.timestamp);
+          break;
+        case 'following':
+          // For now, just show newest posts (following functionality would require user authentication)
+          sortedPosts = sortedPosts.sort((a, b) => b.timestamp - a.timestamp);
+          break;
+      }
+      
+      setPosts(sortedPosts);
+      setNetworkStats({
+        totalPosts: sortedPosts.length,
+        activeUsers: sortedPosts.length > 0 ? new Set(sortedPosts.map(p => p.author)).size : 0,
+        cuDistributed: sortedPosts.reduce((sum, post) => sum + post.rewards, 0)
+      });
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load posts from the blockchain.",
+        variant: "destructive"
+      });
     }
     setLoading(false);
   };
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [currentFilter]);
 
   // Create a new post on-chain
   const handleNewPost = async (content: string, mediaUrl: string) => {
     try {
       await team4Social.createPost(content, mediaUrl);
+      toast({
+        title: "Success!",
+        description: "Your post has been added to the blockchain.",
+      });
       fetchPosts();
-    } catch (e) {
-      // Optionally handle error
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -66,8 +113,38 @@ const Feed = () => {
     try {
       await team4Social.likePost(postId);
       fetchPosts();
-    } catch (e) {
-      // Optionally handle error
+    } catch (error) {
+      console.error('Error liking post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to like post. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Share a post
+  const handleShare = async (postId: number) => {
+    try {
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        const shareText = `${post.content.slice(0, 100)}...\n\nShared from ConnectUS`;
+        await navigator.share({
+          title: 'ConnectUS Post',
+          text: shareText,
+          url: window.location.href
+        });
+      }
+    } catch (error) {
+      // Fallback for browsers that don't support Web Share API
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        navigator.clipboard.writeText(`${post.content.slice(0, 100)}...\n\nShared from ConnectUS`);
+        toast({
+          title: "Shared!",
+          description: "Post link copied to clipboard.",
+        });
+      }
     }
   };
 
@@ -78,7 +155,14 @@ const Feed = () => {
       try {
         const postComments = await team4Social.getComments(postId);
         setComments((prev) => ({ ...prev, [postId]: postComments }));
-      } catch (e) {}
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load comments.",
+          variant: "destructive"
+        });
+      }
       setCommentLoading(false);
     }
   };
@@ -91,45 +175,153 @@ const Feed = () => {
       const postComments = await team4Social.getComments(postId);
       setComments((prev) => ({ ...prev, [postId]: postComments }));
       setCommentInput('');
-      toast({ title: 'Comment added!', description: 'Your comment is now on-chain.' });
-    } catch (e) {
-      toast({ title: 'Error', description: 'Failed to add comment.' });
+      toast({ 
+        title: 'Comment added!',
+        description: "Your comment has been posted to the blockchain."
+      });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive"
+      });
     }
     setCommentLoading(false);
   };
 
+  // Loading skeleton component
+  const PostSkeleton = () => (
+    <div className="bg-card rounded-lg p-6 border border-border space-y-4">
+      <div className="flex items-center gap-4">
+        <Skeleton className="w-12 h-12 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+      </div>
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+      <div className="flex gap-4">
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="h-8 w-20" />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-10 max-w-2xl">
-        <PostForm onPost={handleNewPost} />
-        <div className="mt-8 space-y-6">
-          {loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar - Token Rewards */}
+          <div className="lg:col-span-1 space-y-6">
+            <TokenRewards />
+            {/* Network Stats */}
+            <div className="bg-card rounded-lg p-6 border border-border">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Network Stats
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Posts</span>
+                  <span className="font-medium">{networkStats.totalPosts}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Active Users</span>
+                  <span className="font-medium">{networkStats.activeUsers}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">CU Distributed</span>
+                  <span className="font-medium">{networkStats.cuDistributed}</span>
+                </div>
+              </div>
             </div>
-          ) : posts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center bg-white/70 rounded-2xl shadow-lg border border-indigo-100">
-              <div className="mb-6">
-                <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto text-indigo-400">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 20.25c4.97 0 9-4.03 9-9s-4.03-9-9-9-9 4.03-9 9 4.03 9 9 9zm0-4.5v-6m0 0V7.5m0 2.25h2.25m-2.25 0H9.75" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-indigo-700 mb-2">Welcome to ConnectUS!</h2>
-              <p className="text-lg text-muted-foreground mb-6">Your feed is empty. Be the first to create a post and start the conversation.</p>
-              <div>
-                <span className="inline-block bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold px-6 py-3 rounded-xl shadow hover:from-indigo-600 hover:to-purple-600 transition-all cursor-pointer" onClick={() => document.getElementById('post-form-input')?.focus()}>
-                  Create Your First Post
-                </span>
-              </div>
+          </div>
+          
+          {/* Main Feed */}
+          <div className="lg:col-span-2 space-y-6">
+            <PostForm onPost={handleNewPost} />
+            
+            {/* Feed Filters */}
+            <div className="flex gap-2 p-2 bg-card rounded-lg border border-border">
+              <Button
+                variant={currentFilter === 'newest' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentFilter('newest')}
+                className="flex items-center gap-2"
+              >
+                <Clock className="w-4 h-4" />
+                Newest
+              </Button>
+              <Button
+                variant={currentFilter === 'trending' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentFilter('trending')}
+                className="flex items-center gap-2"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Trending
+              </Button>
+              <Button
+                variant={currentFilter === 'following' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentFilter('following')}
+                className="flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Following
+              </Button>
             </div>
-          ) : (
-            posts.map((post) => (
-              <div key={post.id} className="rounded-2xl bg-white/80 shadow-lg p-6 hover:shadow-2xl transition-all border border-indigo-100">
-                <PostCard post={post} onLike={handleLike} onOpenComments={handleOpenComments} openComments={openComments} comments={comments[post.id] || []} onAddComment={handleAddComment} commentInput={commentInput} setCommentInput={setCommentInput} commentLoading={commentLoading} />
-              </div>
-            ))
-          )}
+            
+            <div className="space-y-6">
+              {loading ? (
+                // Loading skeletons
+                Array.from({ length: 3 }).map((_, index) => (
+                  <PostSkeleton key={index} />
+                ))
+              ) : posts.length === 0 ? (
+                // Empty state
+                <div className="text-center py-12">
+                  <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Be the first to share something on the blockchain!
+                  </p>
+                  <Badge variant="outline" className="text-sm">
+                    {currentFilter === 'newest' ? 'Latest posts will appear here' :
+                     currentFilter === 'trending' ? 'Popular posts will appear here' :
+                     'Posts from people you follow will appear here'}
+                  </Badge>
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    id={post.id}
+                    author={post.author}
+                    content={post.content}
+                    timestamp={post.timestamp}
+                    likes={post.likes}
+                    rewards={post.rewards}
+                    mediaUrl={post.mediaUrl}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                    onOpenComments={handleOpenComments}
+                    openComments={openComments}
+                    comments={comments[post.id] || []}
+                    commentInput={commentInput}
+                    setCommentInput={setCommentInput}
+                    handleAddComment={handleAddComment}
+                    commentLoading={commentLoading}
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

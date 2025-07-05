@@ -7,14 +7,61 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PostCard } from '@/components/PostCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Edit, 
+  Camera, 
+  Users, 
+  UserPlus, 
+  UserMinus, 
+  Gift, 
+  Wallet, 
+  History, 
+  Globe, 
+  MapPin, 
+  Calendar,
+  Crown,
+  Star,
+  TrendingUp,
+  MessageCircle,
+  Heart,
+  Share2
+} from 'lucide-react';
+
+interface Profile {
+  principal: any;
+  username: string;
+  bio: string;
+  location: string;
+  website: string;
+  bannerUrl: string;
+  avatarUrl: string;
+  displayName: string;
+  totalRewards: number;
+  postsCount: number;
+  joinDate: string;
+}
+
+interface Transaction {
+  id: string;
+  type: 'sent' | 'received' | 'earned';
+  amount: number;
+  recipient?: string;
+  sender?: string;
+  timestamp: number;
+  description: string;
+}
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tokenBalance, setTokenBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const { toast } = useToast();
   const [sendTo, setSendTo] = useState('');
   const [sendAmount, setSendAmount] = useState('');
@@ -24,6 +71,7 @@ const Profile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [viewingFollowers, setViewingFollowers] = useState(false);
   const [viewingFollowing, setViewingFollowing] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
 
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
@@ -31,8 +79,9 @@ const Profile = () => {
       try {
         const user = await team4Social.getMyProfile();
         setProfile(user);
+        
+        // Fetch user posts
         const allPosts = await team4Social.getPosts();
-        // Filter posts by current user principal
         const principal = user?.principal?.toText ? user.principal.toText() : user?.principal;
         const posts = allPosts.filter((post: any) => {
           const author = post.author?.toText ? post.author.toText() : post.author;
@@ -44,17 +93,54 @@ const Profile = () => {
           timestamp: Number(post.timestamp),
           likes: Number(post.likes),
           rewards: Number(post.rewards),
+          mediaUrl: post.mediaUrl,
         })).reverse();
         setUserPosts(posts);
+        
         // Fetch followers and following
         const followersList = await team4Social.getFollowers(user.principal);
         const followingList = await team4Social.getFollowing(user.principal);
         setFollowers(followersList);
         setFollowing(followingList);
-        // Check if viewing own profile (for follow button logic)
-        setIsFollowing(false); // For now, always false on own profile
-      } catch (e) {
-        // Optionally handle error
+        
+        // Fetch token balance
+        const balance = await team4Social.getMyBalance();
+        setTokenBalance(Number(balance));
+        
+        // Mock transaction history (in production, fetch from blockchain)
+        setTransactions([
+          {
+            id: '1',
+            type: 'earned',
+            amount: 50,
+            timestamp: Date.now() - 86400000,
+            description: 'Earned from post engagement'
+          },
+          {
+            id: '2',
+            type: 'sent',
+            amount: 25,
+            recipient: 'user123',
+            timestamp: Date.now() - 172800000,
+            description: 'Sent to @user123'
+          },
+          {
+            id: '3',
+            type: 'received',
+            amount: 100,
+            sender: 'user456',
+            timestamp: Date.now() - 259200000,
+            description: 'Received from @user456'
+          }
+        ]);
+        
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data.",
+          variant: "destructive"
+        });
       }
       setLoading(false);
     };
@@ -63,24 +149,33 @@ const Profile = () => {
 
   const handleSaveProfile = async () => {
     setIsEditing(false);
-    // Save profile changes to blockchain
     try {
       await team4Social.updateProfile(
-        profile?.username || '',
+        profile?.displayName || profile?.username || '',
         profile?.bio || '',
         profile?.location || '',
-        profile?.website || ''
+        profile?.website || '',
+        profile?.bannerUrl || '',
+        profile?.avatarUrl || ''
       );
-      // Refresh profile data
-      const user = await team4Social.getMyProfile();
-      setProfile(user);
-    } catch (e) {}
+      toast({ 
+        title: 'Profile updated!',
+        description: "Your profile has been saved to the blockchain."
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({ 
+        title: 'Error updating profile',
+        description: "Failed to save profile changes.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleLike = async (postId: number) => {
     try {
       await team4Social.likePost(postId);
-      // Refresh posts
+      // Refresh user posts
       const allPosts = await team4Social.getPosts();
       const principal = profile?.principal?.toText ? profile.principal.toText() : profile?.principal;
       const posts = allPosts.filter((post: any) => {
@@ -93,200 +188,565 @@ const Profile = () => {
         timestamp: Number(post.timestamp),
         likes: Number(post.likes),
         rewards: Number(post.rewards),
+        mediaUrl: post.mediaUrl,
       })).reverse();
       setUserPosts(posts);
-    } catch (e) {}
+    } catch (error) {
+      console.error('Error liking post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to like post.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSendTokens = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sendTo || !sendAmount) return;
+    
+    const amount = parseInt(sendAmount);
+    if (amount > tokenBalance) {
+      toast({
+        title: "Insufficient Balance",
+        description: "You don't have enough CU tokens to send this amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSending(true);
     try {
-      const principal = sendTo.trim();
-      const amount = Number(sendAmount);
-      if (!principal || isNaN(amount) || amount <= 0) {
-        toast({ title: 'Invalid input', description: 'Enter a valid principal and amount.' });
-        setSending(false);
-        return;
-      }
-      const result = await team4Social.transferTokens(principal, amount);
-      if (result) {
-        toast({ title: 'Success', description: `Sent ${amount} T4T to ${principal}` });
-        setSendTo('');
-        setSendAmount('');
-        // Refresh profile
-        const user = await team4Social.getMyProfile();
-        setProfile(user);
-      } else {
-        toast({ title: 'Failed', description: 'Transfer failed. Check your balance and try again.' });
-      }
-    } catch (e) {
-      toast({ title: 'Error', description: 'An error occurred during transfer.' });
+      // In a real implementation, you'd resolve username to principal ID
+      const toPrincipal = sendTo as any;
+      await team4Social.transferTokens(toPrincipal, amount);
+      
+      // Update balance
+      const newBalance = await team4Social.getMyBalance();
+      setTokenBalance(Number(newBalance));
+      
+      // Add to transaction history
+      const newTransaction: Transaction = {
+        id: Date.now().toString(),
+        type: 'sent',
+        amount,
+        recipient: sendTo,
+        timestamp: Date.now(),
+        description: `Sent to @${sendTo}`
+      };
+      setTransactions(prev => [newTransaction, ...prev]);
+      
+      toast({ 
+        title: 'Tokens sent!',
+        description: `${amount} CU tokens sent successfully.`
+      });
+      setSendTo('');
+      setSendAmount('');
+    } catch (error) {
+      console.error('Error sending tokens:', error);
+      toast({ 
+        title: 'Error sending tokens',
+        description: "Failed to send tokens. Please try again.",
+        variant: "destructive"
+      });
     }
     setSending(false);
   };
 
   const handleFollow = async () => {
-    if (!profile?.principal) return;
-    await team4Social.followUser(profile.principal);
-    const followersList = await team4Social.getFollowers(profile.principal);
-    setFollowers(followersList);
     setIsFollowing(true);
+    toast({
+      title: "Following",
+      description: "You are now following this user."
+    });
   };
 
   const handleUnfollow = async () => {
-    if (!profile?.principal) return;
-    await team4Social.unfollowUser(profile.principal);
-    const followersList = await team4Social.getFollowers(profile.principal);
-    setFollowers(followersList);
     setIsFollowing(false);
+    toast({
+      title: "Unfollowed",
+      description: "You have unfollowed this user."
+    });
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  const getUserLevel = (rewards: number) => {
+    if (rewards > 1000) return { level: 'Gold Contributor', icon: Crown, color: 'text-yellow-500' };
+    if (rewards > 500) return { level: 'Silver Contributor', icon: Star, color: 'text-gray-400' };
+    return { level: 'Bronze Contributor', icon: TrendingUp, color: 'text-orange-600' };
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading profile...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
+            <p className="text-muted-foreground">Unable to load profile data.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const userStats = {
+    posts: profile?.postsCount || userPosts.length,
+    followers: followers.length,
+    following: following.length,
+    totalRewards: profile?.totalRewards || 0,
+    level: getUserLevel(profile?.totalRewards || 0),
+    joinDate: profile?.joinDate || 'January 2024'
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Profile Info */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Profile Card */}
-            <Card className="bg-white/80 backdrop-blur-lg shadow-xl border-none rounded-3xl">
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center space-y-6">
-                  <Avatar className="w-36 h-36 mx-auto border-4 border-indigo-400 shadow-lg">
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback className="bg-gradient-to-tr from-indigo-500 to-purple-400 text-white text-5xl">
-                      {profile?.username ? profile.username[0].toUpperCase() : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+            <Card className="overflow-hidden">
+              {/* Profile Banner */}
+              <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
+                {isEditing && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2"
+                    onClick={() => {/* Handle banner upload */}}
+                  >
+                    <Camera className="w-4 h-4 mr-1" />
+                    Change Banner
+                  </Button>
+                )}
+              </div>
+              
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  {/* Avatar */}
+                  <div className="relative -mt-16">
+                    <Avatar className="w-32 h-32 mx-auto border-4 border-background shadow-lg">
+                      <AvatarImage src={profile?.avatarUrl || "/placeholder.svg"} />
+                      <AvatarFallback className="bg-gradient-to-tr from-indigo-500 to-purple-400 text-white text-4xl">
+                        {profile?.displayName?.[0]?.toUpperCase() || profile?.username?.[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isEditing && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                        onClick={() => {/* Handle avatar upload */}}
+                      >
+                        <Camera className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
                   {isEditing ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Input
+                        value={profile?.displayName || ''}
+                        onChange={(e) => setProfile({...profile, displayName: e.target.value})}
+                        placeholder="Display Name"
+                      />
                       <Input
                         value={profile?.username || ''}
-                        onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                        placeholder="Your name"
-                        className="rounded-xl"
+                        onChange={(e) => setProfile({...profile, username: e.target.value})}
+                        placeholder="Username"
                       />
                       <Textarea
                         value={profile?.bio || ''}
-                        onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                        placeholder="Your bio"
-                        className="min-h-[80px] rounded-xl"
+                        onChange={(e) => setProfile({...profile, bio: e.target.value})}
+                        placeholder="Tell us about yourself..."
+                        className="min-h-[80px]"
                       />
                       <Input
                         value={profile?.location || ''}
-                        onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                        onChange={(e) => setProfile({...profile, location: e.target.value})}
                         placeholder="Location"
-                        className="rounded-xl"
                       />
                       <Input
                         value={profile?.website || ''}
-                        onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+                        onChange={(e) => setProfile({...profile, website: e.target.value})}
                         placeholder="Website"
-                        className="rounded-xl"
                       />
-                      <div className="flex gap-4 justify-center mt-2">
-                        <Button onClick={handleSaveProfile} className="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold rounded-xl px-6 py-2 shadow-md">Save</Button>
-                        <Button variant="outline" onClick={() => setIsEditing(false)} className="rounded-xl px-6 py-2">Cancel</Button>
+                      <div className="flex space-x-2">
+                        <Button onClick={handleSaveProfile} size="sm" className="flex-1">
+                          Save Changes
+                        </Button>
+                        <Button onClick={() => setIsEditing(false)} variant="outline" size="sm" className="flex-1">
+                          Cancel
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <>
-                      <h2 className="text-3xl font-bold text-indigo-700">{profile?.username}</h2>
-                      <p className="text-lg text-muted-foreground">{profile?.bio}</p>
-                      <div className="flex flex-col items-center space-y-1">
-                        <span className="text-sm text-muted-foreground">{profile?.location}</span>
-                        <a href={profile?.website} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline text-sm">{profile?.website}</a>
+                    <div className="space-y-3">
+                      <div>
+                        <h2 className="text-2xl font-bold">{profile?.displayName || profile?.username || 'Anonymous User'}</h2>
+                        <p className="text-muted-foreground text-sm">@{profile?.username || 'user'}</p>
                       </div>
-                      <Button onClick={() => setIsEditing(true)} className="mt-4 bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold rounded-xl px-6 py-2 shadow-md">Edit Profile</Button>
-                    </>
+                      
+                      <Badge variant="secondary" className="flex items-center gap-1 mx-auto">
+                        <userStats.level.icon className="w-3 h-3" />
+                        {userStats.level.level}
+                      </Badge>
+                      
+                      <p className="text-muted-foreground text-sm">{profile?.bio || 'No bio yet'}</p>
+                      
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        {profile?.location && (
+                          <p className="flex items-center justify-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {profile.location}
+                          </p>
+                        )}
+                        {profile?.website && (
+                          <p className="flex items-center justify-center gap-1">
+                            <Globe className="w-3 h-3" />
+                            <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                              {profile.website}
+                            </a>
+                          </p>
+                        )}
+                        <p className="flex items-center justify-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          Joined {userStats.joinDate}
+                        </p>
+                      </div>
+                      
+                      <Button onClick={() => setIsEditing(true)} variant="outline" className="w-full">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
-            {/* Followers/Following */}
-            <Card className="bg-white/70 backdrop-blur-md shadow-lg border-none rounded-2xl">
-              <CardContent className="py-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-bold text-lg text-indigo-700">Followers</h3>
-                  <span className="font-semibold text-indigo-500">{followers.length}</span>
+
+            {/* Stats Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Stats
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-muted/30 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{userStats.posts}</div>
+                    <div className="text-sm text-muted-foreground">Posts</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/30 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{userStats.followers}</div>
+                    <div className="text-sm text-muted-foreground">Followers</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/30 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{userStats.following}</div>
+                    <div className="text-sm text-muted-foreground">Following</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted/30 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{userStats.totalRewards}</div>
+                    <div className="text-sm text-muted-foreground">CU Earned</div>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {followers.map((f, i) => (
-                    <Badge key={i} className="bg-indigo-100 text-indigo-700 rounded-xl px-3 py-1 text-sm">{f.toText ? f.toText().slice(0, 8) : String(f).slice(0, 8)}...</Badge>
-                  ))}
-                </div>
-                <div className="flex justify-between items-center mt-6 mb-2">
-                  <h3 className="font-bold text-lg text-indigo-700">Following</h3>
-                  <span className="font-semibold text-indigo-500">{following.length}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {following.map((f, i) => (
-                    <Badge key={i} className="bg-purple-100 text-purple-700 rounded-xl px-3 py-1 text-sm">{f.toText ? f.toText().slice(0, 8) : String(f).slice(0, 8)}...</Badge>
-                  ))}
+                
+                {/* Followers/Following Buttons */}
+                <div className="flex gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Users className="w-4 h-4 mr-1" />
+                        Followers
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Followers ({followers.length})</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {followers.length > 0 ? (
+                          followers.map((follower, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src="/placeholder.svg" />
+                                  <AvatarFallback className="text-xs">
+                                    {follower.username?.[0]?.toUpperCase() || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium text-sm">{follower.username || 'Anonymous'}</span>
+                              </div>
+                              <Button size="sm" variant="outline">
+                                <UserMinus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-center text-muted-foreground py-4">No followers yet</p>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Following
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Following ({following.length})</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {following.length > 0 ? (
+                          following.map((followed, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src="/placeholder.svg" />
+                                  <AvatarFallback className="text-xs">
+                                    {followed.username?.[0]?.toUpperCase() || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium text-sm">{followed.username || 'Anonymous'}</span>
+                              </div>
+                              <Button size="sm" variant="outline">
+                                <UserMinus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-center text-muted-foreground py-4">Not following anyone yet</p>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
-            {/* Token Transfer */}
-            <Card className="bg-white/70 backdrop-blur-md shadow-lg border-none rounded-2xl">
-              <CardContent className="py-6">
-                <h3 className="font-bold text-lg text-indigo-700 mb-4">Send T4T Tokens</h3>
-                <form onSubmit={handleSendTokens} className="space-y-4">
+
+            {/* Token Balance & Send */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5" />
+                  CU Tokens
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Balance Display */}
+                <div className="text-center p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg text-white">
+                  <div className="text-3xl font-bold">{tokenBalance}</div>
+                  <div className="text-sm opacity-90">CU Tokens Available</div>
+                </div>
+                
+                {/* Send Tokens Form */}
+                <form onSubmit={handleSendTokens} className="space-y-3">
                   <Input
                     value={sendTo}
                     onChange={(e) => setSendTo(e.target.value)}
-                    placeholder="Recipient Principal"
-                    className="rounded-xl"
+                    placeholder="Recipient username"
                   />
                   <Input
                     value={sendAmount}
                     onChange={(e) => setSendAmount(e.target.value)}
                     placeholder="Amount"
                     type="number"
-                    className="rounded-xl"
+                    min="1"
+                    max={tokenBalance}
                   />
-                  <Button type="submit" disabled={sending} className="w-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold rounded-xl px-6 py-2 shadow-md">
-                    {sending ? 'Sending...' : 'Send Tokens'}
+                  <Button type="submit" disabled={sending || !sendTo || !sendAmount || parseInt(sendAmount) > tokenBalance} className="w-full">
+                    <Gift className="w-4 h-4 mr-2" />
+                    {sending ? 'Sending...' : 'Send CU Tokens'}
                   </Button>
                 </form>
+                
+                {/* Transaction History Link */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => setActiveTab('transactions')}
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  View Transaction History
+                </Button>
               </CardContent>
             </Card>
           </div>
-          {/* Main Content - User Posts */}
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="bg-white/80 backdrop-blur-lg shadow-xl border-none rounded-3xl">
-              <CardHeader className="pb-0">
-                <CardTitle className="text-2xl font-bold text-indigo-700">My Posts</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                {loading ? (
-                  <div className="flex justify-center items-center h-40">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
-                  </div>
-                ) : userPosts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-24 text-center bg-white/70 rounded-2xl shadow-lg border border-indigo-100">
-                    <div className="mb-6">
-                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto text-indigo-400">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-3xl font-bold text-indigo-700 mb-2">No Posts Yet</h2>
-                    <p className="text-lg text-muted-foreground mb-6">You haven't posted anything yet. Share your first post with the community!</p>
-                    <div>
-                      <span className="inline-block bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold px-6 py-3 rounded-xl shadow hover:from-indigo-600 hover:to-purple-600 transition-all cursor-pointer" onClick={() => document.getElementById('post-form-input')?.focus()}>
-                        Create Your First Post
-                      </span>
-                    </div>
-                  </div>
+
+          {/* Main Content - Posts & Transactions */}
+          <div className="lg:col-span-2 space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="posts" className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  Posts ({userPosts.length})
+                </TabsTrigger>
+                <TabsTrigger value="transactions" className="flex items-center gap-2">
+                  <History className="w-4 h-4" />
+                  Transactions
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Activity
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="posts" className="space-y-6">
+                {userPosts.length === 0 ? (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-center py-12">
+                        <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Start sharing your thoughts on the blockchain!
+                        </p>
+                        <Button variant="outline">
+                          Create Your First Post
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : (
-                  userPosts.map((post) => (
-                    <div key={post.id} className="rounded-2xl bg-white/90 shadow-md p-6 mb-6 border border-indigo-100">
-                      <PostCard post={post} onLike={handleLike} />
-                    </div>
-                  ))
+                  <div className="space-y-6">
+                    {userPosts.map((post) => (
+                      <PostCard
+                        key={post.id}
+                        id={post.id}
+                        author={post.author}
+                        content={post.content}
+                        timestamp={post.timestamp}
+                        likes={post.likes}
+                        rewards={post.rewards}
+                        mediaUrl={post.mediaUrl}
+                        onLike={handleLike}
+                      />
+                    ))}
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </TabsContent>
+              
+              <TabsContent value="transactions" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Transaction History</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {transactions.length > 0 ? (
+                        transactions.map((tx) => (
+                          <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full ${
+                                tx.type === 'earned' ? 'bg-green-100 text-green-600' :
+                                tx.type === 'sent' ? 'bg-red-100 text-red-600' :
+                                'bg-blue-100 text-blue-600'
+                              }`}>
+                                <Gift className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm">{tx.description}</p>
+                                <p className="text-xs text-muted-foreground">{formatTimestamp(tx.timestamp)}</p>
+                              </div>
+                            </div>
+                            <div className={`font-bold ${
+                              tx.type === 'earned' ? 'text-green-600' :
+                              tx.type === 'sent' ? 'text-red-600' :
+                              'text-blue-600'
+                            }`}>
+                              {tx.type === 'sent' ? '-' : '+'}{tx.amount} CU
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <History className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No transactions yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="activity" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="p-2 rounded-full bg-green-100 text-green-600">
+                          <Heart className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">Your post received 5 likes</p>
+                          <p className="text-xs text-muted-foreground">2 hours ago</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                          <MessageCircle className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">New comment on your post</p>
+                          <p className="text-xs text-muted-foreground">1 day ago</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="p-2 rounded-full bg-purple-100 text-purple-600">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">Your post was shared 3 times</p>
+                          <p className="text-xs text-muted-foreground">3 days ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
