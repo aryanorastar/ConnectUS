@@ -37,7 +37,8 @@ import {
   Settings,
   HelpCircle,
   Info,
-  Search
+  Search,
+  Lightbulb
 } from 'lucide-react';
 import {
   Dialog,
