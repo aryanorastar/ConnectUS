@@ -36,23 +36,30 @@ type Comment =
  };
 service : {
   addComment: (postId: nat, content: text) -> (nat);
-  createNFT: (metadata: text) -> (nat);
   createPost: (content: text, mediaUrl: text) -> (nat);
-  followUser: (userToFollow: principal) -> (bool);
-  getCommentCount: () -> (nat) query;
+  followUser: (target: principal) -> (bool);
   getComments: (postId: nat) -> (vec Comment) query;
-  getFollowers: (userPrincipal: principal) -> (vec principal) query;
-  getFollowing: (userPrincipal: principal) -> (vec principal) query;
+  getFollowers: (user: principal) -> (vec principal) query;
+  getFollowing: (user: principal) -> (vec principal) query;
+  getLeaderboard: (n: nat) -> (vec User) query;
+  getMyNFTs: () -> (vec NFT);
   getMyProfile: () -> (opt User);
-  getNFTCount: () -> (nat) query;
-  getPostCount: () -> (nat) query;
+  getNFTMetadata: (nftId: nat) -> (opt NFT) query;
+  getPlatformStats: () -> (record {
+                             totalPosts: nat;
+                             totalUsers: nat;
+                           }) query;
   getPosts: () -> (vec Post) query;
-  getTrendingHashtags: () -> (vec text) query;
-  getUserCount: () -> (nat) query;
-  getUserNFTs: (userPrincipal: principal) -> (vec NFT) query;
+  getTrendingHashtags: (n: nat) -> (vec record {
+                                          text;
+                                          nat;
+                                        }) query;
   getUserProfile: (userPrincipal: principal) -> (opt User) query;
   likePost: (postId: nat) -> (bool);
+  mintNFT: (metadata: text) -> (nat);
+  seedDemoData: () -> (bool);
   transferTokens: (to: principal, amount: nat) -> (bool);
+  unfollowUser: (target: principal) -> (bool);
   updateProfile: (username: text, bio: text, location: text, website:
    text) -> (bool);
 }
