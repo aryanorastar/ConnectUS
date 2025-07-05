@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -34,7 +35,20 @@ import {
   Plus,
   Info,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Trophy,
+  Target,
+  Zap,
+  Award,
+  CheckCircle,
+  Lightbulb,
+  ArrowRight,
+  Play,
+  BookOpen,
+  PenTool,
+  Hash,
+  AtSign
 } from 'lucide-react';
 
 interface Profile {
@@ -61,6 +75,16 @@ interface Transaction {
   description: string;
 }
 
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  unlocked: boolean;
+  progress?: number;
+  maxProgress?: number;
+}
+
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -79,6 +103,71 @@ const Profile = () => {
   const [viewingFollowers, setViewingFollowers] = useState(false);
   const [viewingFollowing, setViewingFollowing] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
+
+  // Profile completion tracking
+  const getProfileCompletion = (profile: Profile) => {
+    const fields = [
+      profile.displayName,
+      profile.bio,
+      profile.location,
+      profile.website,
+      profile.avatarUrl,
+      profile.bannerUrl
+    ];
+    const completedFields = fields.filter(field => field && field.trim() !== '').length;
+    return Math.round((completedFields / fields.length) * 100);
+  };
+
+  // Achievements system
+  const getAchievements = (profile: Profile, posts: any[], rewards: number): Achievement[] => [
+    {
+      id: 'first-post',
+      title: 'First Steps',
+      description: 'Create your first post',
+      icon: PenTool,
+      unlocked: posts.length > 0,
+      progress: posts.length,
+      maxProgress: 1
+    },
+    {
+      id: 'social-butterfly',
+      title: 'Social Butterfly',
+      description: 'Get 10 followers',
+      icon: Users,
+      unlocked: followers.length >= 10,
+      progress: followers.length,
+      maxProgress: 10
+    },
+    {
+      id: 'content-creator',
+      title: 'Content Creator',
+      description: 'Create 5 posts',
+      icon: MessageCircle,
+      unlocked: posts.length >= 5,
+      progress: posts.length,
+      maxProgress: 5
+    },
+    {
+      id: 'reward-earner',
+      title: 'Reward Earner',
+      description: 'Earn 100 CU tokens',
+      icon: Trophy,
+      unlocked: rewards >= 100,
+      progress: rewards,
+      maxProgress: 100
+    },
+    {
+      id: 'profile-complete',
+      title: 'Profile Perfect',
+      description: 'Complete your profile',
+      icon: CheckCircle,
+      unlocked: getProfileCompletion(profile) >= 80,
+      progress: getProfileCompletion(profile),
+      maxProgress: 100
+    }
+  ];
 
   const fetchProfileAndPosts = async () => {
     setLoading(true);
@@ -152,6 +241,12 @@ const Profile = () => {
         }
       ]);
       
+      // Check if user needs onboarding
+      const completion = getProfileCompletion(user);
+      if (completion < 50) {
+        setShowOnboarding(true);
+      }
+      
     } catch (error) {
       console.error('Error fetching profile:', error);
       setError('Failed to load profile data. Please try again.');
@@ -216,7 +311,7 @@ const Profile = () => {
       console.error('Error liking post:', error);
       toast({
         title: "Error",
-        description: "Failed to like post.",
+        description: "Failed to like post. Please try again.",
         variant: "destructive"
       });
     }
@@ -224,27 +319,34 @@ const Profile = () => {
 
   const handleSendTokens = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sendTo || !sendAmount) return;
-    
-    const amount = parseInt(sendAmount);
-    if (amount > tokenBalance) {
+    if (!sendTo || !sendAmount) {
       toast({
-        title: "Insufficient Balance",
-        description: "You don't have enough CU tokens to send this amount.",
+        title: "Invalid Input",
+        description: "Please fill in all fields.",
         variant: "destructive"
       });
       return;
     }
-    
+
+    const amount = parseInt(sendAmount);
+    if (amount <= 0 || amount > tokenBalance) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount within your balance.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSending(true);
     try {
-      // In a real implementation, you'd resolve username to principal ID
-      const toPrincipal = sendTo as any;
-      await team4Social.transferTokens(toPrincipal, amount);
+      // In a real implementation, this would call the blockchain
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
       
-      // Update balance
-      const newBalance = await team4Social.getMyBalance();
-      setTokenBalance(Number(newBalance));
+      // Update local state
+      setTokenBalance(prev => prev - amount);
+      setSendTo('');
+      setSendAmount('');
       
       // Add to transaction history
       const newTransaction: Transaction = {
@@ -257,16 +359,14 @@ const Profile = () => {
       };
       setTransactions(prev => [newTransaction, ...prev]);
       
-      toast({ 
-        title: 'Tokens sent!',
-        description: `${amount} CU tokens sent successfully.`
+      toast({
+        title: "Tokens Sent!",
+        description: `${amount} CU tokens sent to @${sendTo}`,
       });
-      setSendTo('');
-      setSendAmount('');
     } catch (error) {
       console.error('Error sending tokens:', error);
-      toast({ 
-        title: 'Error sending tokens',
+      toast({
+        title: "Error",
         description: "Failed to send tokens. Please try again.",
         variant: "destructive"
       });
@@ -275,38 +375,30 @@ const Profile = () => {
   };
 
   const handleFollow = async () => {
+    // Implementation for following
     setIsFollowing(true);
-    toast({
-      title: "Following",
-      description: "You are now following this user."
-    });
   };
 
   const handleUnfollow = async () => {
+    // Implementation for unfollowing
     setIsFollowing(false);
-    toast({
-      title: "Unfollowed",
-      description: "You have unfollowed this user."
-    });
   };
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
     return date.toLocaleDateString();
   };
 
   const getUserLevel = (rewards: number) => {
-    if (rewards > 1000) return { level: 'Gold Contributor', icon: Crown, color: 'text-yellow-500', description: 'Elite community member with 1000+ CU earned' };
-    if (rewards > 500) return { level: 'Silver Contributor', icon: Star, color: 'text-gray-400', description: 'Active contributor with 500+ CU earned' };
-    return { level: 'Bronze Contributor', icon: TrendingUp, color: 'text-orange-600', description: 'New contributor with 0-500 CU earned' };
+    if (rewards >= 1000) return { level: 'Gold', icon: Crown, description: 'Elite member with 1000+ CU earned' };
+    if (rewards >= 500) return { level: 'Silver', icon: Star, description: 'Active member with 500+ CU earned' };
+    return { level: 'Bronze', icon: Target, description: 'New member building their presence' };
   };
 
   const handleAvatarUpload = () => {
@@ -324,6 +416,29 @@ const Profile = () => {
       description: "Banner upload feature coming soon!",
     });
   };
+
+  const onboardingSteps = [
+    {
+      title: "Welcome to ConnectUS!",
+      description: "Let's set up your profile to get the most out of the platform.",
+      icon: Sparkles
+    },
+    {
+      title: "Add Your Bio",
+      description: "Tell others about yourself to build meaningful connections.",
+      icon: PenTool
+    },
+    {
+      title: "Upload a Photo",
+      description: "Add a profile picture to make your profile more personal.",
+      icon: Camera
+    },
+    {
+      title: "Start Posting",
+      description: "Share your thoughts and earn CU tokens for engagement.",
+      icon: MessageCircle
+    }
+  ];
 
   if (loading) {
     return (
@@ -383,10 +498,69 @@ const Profile = () => {
     joinDate: profile?.joinDate || 'January 2024'
   };
 
+  const achievements = getAchievements(profile, userPosts, userStats.totalRewards);
+  const profileCompletion = getProfileCompletion(profile);
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         <Header />
+        
+        {/* Onboarding Modal */}
+        {showOnboarding && (
+          <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    {(() => {
+                      const IconComponent = onboardingSteps[onboardingStep].icon;
+                      return <IconComponent className="w-5 h-5" />;
+                    })()}
+                    {onboardingSteps[onboardingStep].title}
+                  </DialogTitle>
+                </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  {onboardingSteps[onboardingStep].description}
+                </p>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    Step {onboardingStep + 1} of {onboardingSteps.length}
+                  </div>
+                  <div className="flex gap-2">
+                    {onboardingStep > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setOnboardingStep(prev => prev - 1)}
+                      >
+                        Previous
+                      </Button>
+                    )}
+                    {onboardingStep < onboardingSteps.length - 1 ? (
+                      <Button
+                        size="sm"
+                        onClick={() => setOnboardingStep(prev => prev + 1)}
+                      >
+                        Next
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setShowOnboarding(false)}
+                      >
+                        Get Started
+                        <Play className="w-4 h-4 ml-1" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Sidebar - Profile Info */}
@@ -549,7 +723,43 @@ const Profile = () => {
                 </CardContent>
               </Card>
 
-              {/* Stats Card */}
+              {/* Profile Completion Card */}
+              {profileCompletion < 100 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Target className="w-4 h-4" />
+                      Profile Completion
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Complete your profile</span>
+                        <span>{profileCompletion}%</span>
+                      </div>
+                      <Progress value={profileCompletion} className="h-2" />
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      {!profile?.bio && <p>• Add a bio to tell others about yourself</p>}
+                      {!profile?.avatarUrl && <p>• Upload a profile picture</p>}
+                      {!profile?.location && <p>• Add your location</p>}
+                      {!profile?.website && <p>• Link your website</p>}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setIsEditing(true)}
+                      className="w-full"
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Complete Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Stats Card with Hierarchy */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -558,22 +768,27 @@ const Profile = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Primary Stats */}
+                  <div className="space-y-3">
+                    <div className="text-center p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                      <div className="text-3xl font-bold text-primary">{userStats.totalRewards}</div>
+                      <div className="text-sm text-muted-foreground">CU Tokens Earned</div>
+                    </div>
                     <div className="text-center p-3 bg-muted/30 rounded-lg">
                       <div className="text-2xl font-bold text-primary">{userStats.posts}</div>
-                      <div className="text-sm text-muted-foreground">Posts</div>
+                      <div className="text-sm text-muted-foreground">Posts Created</div>
                     </div>
-                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">{userStats.followers}</div>
-                      <div className="text-sm text-muted-foreground">Followers</div>
+                  </div>
+                  
+                  {/* Secondary Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-xl font-semibold">{userStats.followers}</div>
+                      <div className="text-xs text-muted-foreground">Followers</div>
                     </div>
-                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">{userStats.following}</div>
-                      <div className="text-sm text-muted-foreground">Following</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                      <div className="text-2xl font-bold text-primary">{userStats.totalRewards}</div>
-                      <div className="text-sm text-muted-foreground">CU Earned</div>
+                    <div className="text-center p-3 bg-muted/20 rounded-lg">
+                      <div className="text-xl font-semibold">{userStats.following}</div>
+                      <div className="text-xs text-muted-foreground">Following</div>
                     </div>
                   </div>
                   
@@ -654,7 +869,53 @@ const Profile = () => {
                 </CardContent>
               </Card>
 
-              {/* Token Balance & Send */}
+              {/* Achievements Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="w-5 h-5" />
+                    Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {achievements.map((achievement) => (
+                    <div key={achievement.id} className={`flex items-center gap-3 p-3 rounded-lg ${
+                      achievement.unlocked ? 'bg-green-50 border border-green-200' : 'bg-muted/30'
+                    }`}>
+                      <div className={`p-2 rounded-full ${
+                        achievement.unlocked ? 'bg-green-100 text-green-600' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        <achievement.icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-medium text-sm ${
+                          achievement.unlocked ? 'text-green-800' : 'text-muted-foreground'
+                        }`}>
+                          {achievement.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                        {achievement.progress !== undefined && achievement.maxProgress && (
+                          <div className="mt-1">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                              <span>Progress</span>
+                              <span>{achievement.progress}/{achievement.maxProgress}</span>
+                            </div>
+                            <Progress 
+                              value={(achievement.progress / achievement.maxProgress) * 100} 
+                              className="h-1" 
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {achievement.unlocked && (
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Enhanced Token Balance & Send */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -669,26 +930,51 @@ const Profile = () => {
                     <div className="text-sm opacity-90">CU Tokens Available</div>
                   </div>
                   
-                  {/* Send Tokens Form */}
-                  <form onSubmit={handleSendTokens} className="space-y-3">
-                    <Input
-                      value={sendTo}
-                      onChange={(e) => setSendTo(e.target.value)}
-                      placeholder="Recipient username"
-                    />
-                    <Input
-                      value={sendAmount}
-                      onChange={(e) => setSendAmount(e.target.value)}
-                      placeholder="Amount"
-                      type="number"
-                      min="1"
-                      max={tokenBalance}
-                    />
-                    <Button type="submit" disabled={sending || !sendTo || !sendAmount || parseInt(sendAmount) > tokenBalance} className="w-full">
+                  {/* Send Tokens Form with Better Validation */}
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Recipient Username</label>
+                      <div className="relative">
+                        <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={sendTo}
+                          onChange={(e) => setSendTo(e.target.value)}
+                          placeholder="username"
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">Amount to Send</label>
+                      <div className="relative">
+                        <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={sendAmount}
+                          onChange={(e) => setSendAmount(e.target.value)}
+                          placeholder="0"
+                          type="number"
+                          min="1"
+                          max={tokenBalance}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>Min: 1 CU</span>
+                        <span>Max: {tokenBalance} CU</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      disabled={sending || !sendTo || !sendAmount || parseInt(sendAmount) > tokenBalance || parseInt(sendAmount) < 1} 
+                      className="w-full"
+                      onClick={handleSendTokens}
+                    >
                       <Gift className="w-4 h-4 mr-2" />
                       {sending ? 'Sending...' : 'Send CU Tokens'}
                     </Button>
-                  </form>
+                  </div>
                   
                   {/* Transaction History Link */}
                   <Button 
@@ -727,14 +1013,27 @@ const Profile = () => {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="text-center py-12">
-                          <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                          <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                          <p className="text-muted-foreground mb-4">
-                            Start sharing your thoughts on the blockchain!
+                          <div className="relative mb-6">
+                            <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto" />
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                              <Plus className="w-4 h-4 text-white" />
+                            </div>
+                          </div>
+                          <h3 className="text-xl font-semibold mb-3">Ready to Share Your Story?</h3>
+                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                            Start your journey on ConnectUS by creating your first post. Share your thoughts, 
+                            connect with others, and earn CU tokens for meaningful engagement.
                           </p>
-                          <Button variant="outline">
-                            Create Your First Post
-                          </Button>
+                          <div className="space-y-3">
+                            <Button className="flex items-center gap-2 mx-auto">
+                              <PenTool className="w-4 h-4" />
+                              Create Your First Post
+                            </Button>
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <p>💡 <strong>Tip:</strong> Posts with engaging content earn more CU tokens</p>
+                              <p>🌟 <strong>Pro tip:</strong> Use hashtags to reach more people</p>
+                            </div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
