@@ -41,6 +41,7 @@ import {
   ThumbsUp,
   Award
 } from 'lucide-react';
+import PostCard from '@/components/PostCard';
 
 interface TrendingPost {
   id: number;
@@ -246,88 +247,6 @@ const Explore = () => {
     
     return date.toLocaleDateString();
   };
-
-  const PostCard = ({ post }: { post: TrendingPost }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
-          <Avatar className="w-12 h-12">
-            <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback className="bg-gradient-to-tr from-indigo-500 to-purple-400 text-white">
-              {post.author[0]?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">{post.author}</span>
-              <Badge variant="outline" size="sm" className="text-xs">
-                {categories.find(c => c.id === post.category)?.name || 'General'}
-              </Badge>
-              <span className="text-xs text-muted-foreground">{formatTimestamp(post.timestamp)}</span>
-            </div>
-            
-            <p className="text-sm leading-relaxed">{post.content}</p>
-            
-            {post.mediaUrl && (
-              <div className="rounded-lg overflow-hidden bg-muted/30">
-                <img src={post.mediaUrl} alt="Post media" className="w-full h-48 object-cover" />
-              </div>
-            )}
-            
-            {post.hashtags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {post.hashtags.slice(0, 3).map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-                {post.hashtags.length > 3 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{post.hashtags.length - 3} more
-                  </Badge>
-                )}
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <button 
-                  onClick={() => handleLike(post.id)}
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
-                >
-                  <Heart className="w-4 h-4" />
-                  {post.likes}
-                </button>
-                <div className="flex items-center gap-1">
-                  <MessageCircle className="w-4 h-4" />
-                  {Math.floor(Math.random() * 10)}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Share2 className="w-4 h-4" />
-                  {Math.floor(Math.random() * 5)}
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  <Award className="w-3 h-3 mr-1" />
-                  {post.rewards} CU
-                </Badge>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => handleShare(post.id)}
-                >
-                  <Share2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="min-h-screen bg-background">

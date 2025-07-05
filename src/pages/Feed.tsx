@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { PostForm } from '@/components/PostForm';
-import { PostCard } from '@/components/PostCard';
+import PostCard from '@/components/PostCard';
 import { TokenRewards } from '@/components/TokenRewards';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';

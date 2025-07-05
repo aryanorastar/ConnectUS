@@ -136,7 +136,7 @@ const PostCard = ({
     }
   };
 
-  const handleAddComment = () => {
+  const handleAddCommentLocal = () => {
     if (handleAddComment && commentInput.trim()) {
       handleAddComment(id);
     }
@@ -375,18 +375,18 @@ const PostCard = ({
                   onChange={(e) => setCommentInput?.(e.target.value)}
                   placeholder="Write a comment..."
                   className="pr-10"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleAddComment();
-                    }
-                  }}
+                                     onKeyPress={(e) => {
+                     if (e.key === 'Enter' && !e.shiftKey) {
+                       e.preventDefault();
+                       handleAddCommentLocal();
+                     }
+                   }}
                 />
                 <Button
                   size="sm"
                   variant="ghost"
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={handleAddComment}
+                  onClick={handleAddCommentLocal}
                   disabled={commentLoading || !commentInput.trim()}
                 >
                   <Send className="w-3 h-3" />
