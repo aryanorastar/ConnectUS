@@ -70,6 +70,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[120px] resize-none border-border focus:border-primary transition-colors"
             maxLength={characterLimit}
+            data-post-form-input
           />
           {/* Media upload */}
           <div className="flex items-center gap-2">

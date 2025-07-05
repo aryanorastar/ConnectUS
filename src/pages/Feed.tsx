@@ -8,7 +8,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, Clock, Users, MessageCircle, Share2, Heart, Gift } from 'lucide-react';
+import { 
+  TrendingUp, 
+  Clock, 
+  Users, 
+  MessageCircle, 
+  Share2, 
+  Heart, 
+  Gift,
+  Plus,
+  Activity,
+  Zap
+} from 'lucide-react';
 
 interface Post {
   id: number;
@@ -25,6 +36,7 @@ type FeedFilter = 'newest' | 'trending' | 'following';
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [networkStats, setNetworkStats] = useState({
     totalPosts: 0,
     activeUsers: 0,
@@ -40,10 +52,11 @@ const Feed = () => {
   // Fetch posts from the canister
   const fetchPosts = async () => {
     setLoading(true);
+    setStatsLoading(true);
     try {
       const canisterPosts = await team4Social.getPosts();
       // Map backend posts to frontend format
-      const mapped = canisterPosts.map((post: any) => ({
+      const mapped = (canisterPosts as any[]).map((post: any) => ({
         id: Number(post.id),
         author: post.author.toText ? post.author.toText() : String(post.author),
         content: post.content,
@@ -69,11 +82,17 @@ const Feed = () => {
       }
       
       setPosts(sortedPosts);
-      setNetworkStats({
-        totalPosts: sortedPosts.length,
-        activeUsers: sortedPosts.length > 0 ? new Set(sortedPosts.map(p => p.author)).size : 0,
-        cuDistributed: sortedPosts.reduce((sum, post) => sum + post.rewards, 0)
-      });
+      
+      // Calculate network stats with a slight delay to show loading state
+      setTimeout(() => {
+        setNetworkStats({
+          totalPosts: sortedPosts.length,
+          activeUsers: sortedPosts.length > 0 ? new Set(sortedPosts.map(p => p.author)).size : 0,
+          cuDistributed: sortedPosts.reduce((sum, post) => sum + post.rewards, 0)
+        });
+        setStatsLoading(false);
+      }, 500);
+      
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
@@ -81,6 +100,7 @@ const Feed = () => {
         description: "Failed to load posts from the blockchain.",
         variant: "destructive"
       });
+      setStatsLoading(false);
     }
     setLoading(false);
   };
@@ -154,7 +174,7 @@ const Feed = () => {
       setCommentLoading(true);
       try {
         const postComments = await team4Social.getComments(postId);
-        setComments((prev) => ({ ...prev, [postId]: postComments }));
+        setComments((prev) => ({ ...prev, [postId]: postComments as any[] }));
       } catch (error) {
         console.error('Error fetching comments:', error);
         toast({
@@ -173,7 +193,7 @@ const Feed = () => {
     try {
       await team4Social.addComment(postId, commentInput);
       const postComments = await team4Social.getComments(postId);
-      setComments((prev) => ({ ...prev, [postId]: postComments }));
+      setComments((prev) => ({ ...prev, [postId]: postComments as any[] }));
       setCommentInput('');
       toast({ 
         title: 'Comment added!',
@@ -188,6 +208,15 @@ const Feed = () => {
       });
     }
     setCommentLoading(false);
+  };
+
+  // Focus on post form when "Create Your First Post" is clicked
+  const handleCreateFirstPost = () => {
+    const postFormInput = document.querySelector('[data-post-form-input]') as HTMLTextAreaElement;
+    if (postFormInput) {
+      postFormInput.focus();
+      postFormInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   // Loading skeleton component
@@ -211,6 +240,24 @@ const Feed = () => {
     </div>
   );
 
+  // Stats skeleton component
+  const StatsSkeleton = () => (
+    <div className="space-y-3">
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -222,23 +269,36 @@ const Feed = () => {
             {/* Network Stats */}
             <div className="bg-card rounded-lg p-6 border border-border">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+                <Activity className="w-5 h-5" />
                 Network Stats
               </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Posts</span>
-                  <span className="font-medium">{networkStats.totalPosts}</span>
+              {statsLoading ? (
+                <StatsSkeleton />
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Total Posts</span>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-blue-500" />
+                      <span className="font-medium">{networkStats.totalPosts.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Active Users</span>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-green-500" />
+                      <span className="font-medium">{networkStats.activeUsers.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">CU Distributed</span>
+                    <div className="flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-purple-500" />
+                      <span className="font-medium">{networkStats.cuDistributed.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Active Users</span>
-                  <span className="font-medium">{networkStats.activeUsers}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">CU Distributed</span>
-                  <span className="font-medium">{networkStats.cuDistributed}</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
           
@@ -246,35 +306,43 @@ const Feed = () => {
           <div className="lg:col-span-2 space-y-6">
             <PostForm onPost={handleNewPost} />
             
-            {/* Feed Filters */}
-            <div className="flex gap-2 p-2 bg-card rounded-lg border border-border">
-              <Button
-                variant={currentFilter === 'newest' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentFilter('newest')}
-                className="flex items-center gap-2"
-              >
-                <Clock className="w-4 h-4" />
-                Newest
-              </Button>
-              <Button
-                variant={currentFilter === 'trending' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentFilter('trending')}
-                className="flex items-center gap-2"
-              >
-                <TrendingUp className="w-4 h-4" />
-                Trending
-              </Button>
-              <Button
-                variant={currentFilter === 'following' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentFilter('following')}
-                className="flex items-center gap-2"
-              >
-                <Users className="w-4 h-4" />
-                Following
-              </Button>
+            {/* Feed Filters - Repositioned for better clarity */}
+            <div className="bg-card rounded-lg border border-border p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Feed</h3>
+                <Badge variant="outline" className="text-xs">
+                  {posts.length} posts
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={currentFilter === 'newest' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentFilter('newest')}
+                  className="flex items-center gap-2"
+                >
+                  <Clock className="w-4 h-4" />
+                  Newest
+                </Button>
+                <Button
+                  variant={currentFilter === 'trending' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentFilter('trending')}
+                  className="flex items-center gap-2"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Trending
+                </Button>
+                <Button
+                  variant={currentFilter === 'following' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentFilter('following')}
+                  className="flex items-center gap-2"
+                >
+                  <Users className="w-4 h-4" />
+                  Following
+                </Button>
+              </div>
             </div>
             
             <div className="space-y-6">
@@ -284,18 +352,36 @@ const Feed = () => {
                   <PostSkeleton key={index} />
                 ))
               ) : posts.length === 0 ? (
-                // Empty state
-                <div className="text-center py-12">
-                  <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Be the first to share something on the blockchain!
-                  </p>
-                  <Badge variant="outline" className="text-sm">
-                    {currentFilter === 'newest' ? 'Latest posts will appear here' :
-                     currentFilter === 'trending' ? 'Popular posts will appear here' :
-                     'Posts from people you follow will appear here'}
-                  </Badge>
+                // Enhanced empty state
+                <div className="text-center py-16 bg-card rounded-lg border border-border">
+                  <div className="max-w-md mx-auto">
+                    <MessageCircle className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
+                    <h3 className="text-2xl font-bold mb-3">No posts yet</h3>
+                    <p className="text-muted-foreground mb-6 text-lg">
+                      Be the first to share something on the blockchain!
+                    </p>
+                    <div className="space-y-4">
+                      <Button 
+                        onClick={handleCreateFirstPost}
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold"
+                        size="lg"
+                      >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Create Your First Post
+                      </Button>
+                      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                        <Zap className="w-4 h-4" />
+                        <span>Start earning CU tokens for your content</span>
+                      </div>
+                    </div>
+                    <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+                      <Badge variant="outline" className="text-sm">
+                        {currentFilter === 'newest' ? 'Latest posts will appear here' :
+                         currentFilter === 'trending' ? 'Popular posts will appear here' :
+                         'Posts from people you follow will appear here'}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 posts.map((post) => (
