@@ -530,7 +530,7 @@ const Explore = () => {
   if (error && posts.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Explore"]} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto text-center py-12">
             <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -549,7 +549,7 @@ const Explore = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Explore"]} />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Enhanced Search & Categories */}

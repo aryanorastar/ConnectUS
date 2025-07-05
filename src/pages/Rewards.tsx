@@ -41,9 +41,9 @@ const Rewards = () => {
   const weeklyProgress = 0; // Placeholder, implement logic if you track weekly progress
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50">
-      <Header />
-      <div className="container mx-auto px-4 py-12 max-w-3xl">
+    <div className="min-h-screen bg-background">
+      <Header showBreadcrumbs breadcrumbs={["Rewards"]} />
+      <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-extrabold text-indigo-700 mb-10 text-center">Leaderboard</h1>
         <div className="space-y-6">
           {loading ? (

@@ -36,7 +36,8 @@ import {
   Bookmark,
   Settings,
   HelpCircle,
-  Info
+  Info,
+  Search
 } from 'lucide-react';
 import {
   Dialog,

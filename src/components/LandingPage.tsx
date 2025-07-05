@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -237,25 +238,11 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50">
+      <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4">
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-400/20 via-purple-300/20 to-pink-200/20"></div>
         <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16">
-          {/* ConnectUS Logo & Brand */}
-          <div className="flex items-center justify-center space-x-6 mb-8">
-            <div className="w-24 h-24 bg-gradient-to-tr from-indigo-500 to-purple-400 rounded-3xl flex items-center justify-center shadow-2xl">
-              <span className="text-white font-bold text-4xl">CU</span>
-            </div>
-            <div className="text-left">
-              <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-indigo-700 to-purple-500">
-                ConnectUS
-              </h1>
-              <p className="text-xl text-muted-foreground font-medium mt-2">
-                Own Your Social Media • Earn Real Rewards
-              </p>
-            </div>
-          </div>
-
           <h2 className="text-5xl font-bold text-foreground leading-tight max-w-4xl mx-auto">
             The Social Platform That
             <span className="text-primary"> Pays You Back</span>

@@ -443,7 +443,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Profile"]} />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -459,7 +459,7 @@ const Profile = () => {
   if (error && !profile) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Profile"]} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto text-center py-12">
             <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -478,7 +478,7 @@ const Profile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Profile"]} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
@@ -504,7 +504,7 @@ const Profile = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header showBreadcrumbs breadcrumbs={["Profile"]} />
         
         {/* Onboarding Modal */}
         {showOnboarding && (

@@ -319,7 +319,7 @@ const Feed = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header showBreadcrumbs breadcrumbs={["Feed"]} />
       <div className="container mx-auto px-4 py-8">
         <OnboardingGuide />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
