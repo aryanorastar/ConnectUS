@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { PostForm } from '@/components/PostForm';
 import PostCard from '@/components/PostCard';
 import { TokenRewards } from '@/components/TokenRewards';
+import { OnboardingGuide } from '@/components/OnboardingGuide';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -320,6 +321,7 @@ const Feed = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 py-8">
+        <OnboardingGuide />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Token Rewards */}
           <div className="lg:col-span-1 space-y-6">
