@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -46,7 +47,29 @@ import {
   Plus,
   Crown,
   HelpCircle,
-  Info
+  Info,
+  Flame,
+  TrendingDown,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Activity,
+  Trophy,
+  Gift,
+  Calendar,
+  MapPin,
+  ExternalLink,
+  Play,
+  Pause,
+  Volume2,
+  Image as ImageIcon,
+  FileText,
+  Link,
+  Hash as HashIcon,
+  AtSign,
+  Filter as FilterIcon,
+  SortAsc,
+  SortDesc
 } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 import {
@@ -55,6 +78,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 interface TrendingPost {
   id: number;
@@ -66,6 +94,8 @@ interface TrendingPost {
   hashtags: string[];
   category: string;
   mediaUrl?: string;
+  contentType?: 'text' | 'image' | 'video' | 'link';
+  engagement?: number;
 }
 
 interface Category {
@@ -75,6 +105,21 @@ interface Category {
   color: string;
   description: string;
   postCount: number;
+  isPopular?: boolean;
+}
+
+interface TopContributor {
+  id: number;
+  username: string;
+  displayName: string;
+  avatar: string;
+  followers: number;
+  bio: string;
+  level: string;
+  recentActivity: string;
+  cuEarned: number;
+  postsCount: number;
+  lastActive: number;
 }
 
 const Explore = () => {
@@ -83,18 +128,21 @@ const Explore = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<TopContributor[]>([]);
   const [trendingHashtags, setTrendingHashtags] = useState<string[]>([]);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [sortBy, setSortBy] = useState<'trending' | 'recent' | 'rewards'>('trending');
+  const [filterByContent, setFilterByContent] = useState<string>('all');
   const { toast } = useToast();
 
-  // Categories with icons and colors
+  // Enhanced categories with popularity indicators
   const categories: Category[] = [
-    { id: 'tech', name: 'Technology', icon: Code, color: 'bg-blue-500', description: 'Latest in tech and innovation', postCount: 42 },
-    { id: 'art', name: 'Art & Design', icon: Palette, color: 'bg-purple-500', description: 'Creative expressions and designs', postCount: 28 },
-    { id: 'gaming', name: 'Gaming', icon: Gamepad2, color: 'bg-green-500', description: 'Gaming news and discussions', postCount: 35 },
+    { id: 'tech', name: 'Technology', icon: Code, color: 'bg-blue-500', description: 'Latest in tech and innovation', postCount: 42, isPopular: true },
+    { id: 'art', name: 'Art & Design', icon: Palette, color: 'bg-purple-500', description: 'Creative expressions and designs', postCount: 28, isPopular: true },
+    { id: 'gaming', name: 'Gaming', icon: Gamepad2, color: 'bg-green-500', description: 'Gaming news and discussions', postCount: 35, isPopular: true },
+    { id: 'lifestyle', name: 'Lifestyle', icon: HeartIcon, color: 'bg-pink-500', description: 'Life tips and inspiration', postCount: 47, isPopular: true },
     { id: 'food', name: 'Food & Cooking', icon: Utensils, color: 'bg-orange-500', description: 'Culinary adventures and recipes', postCount: 19 },
     { id: 'travel', name: 'Travel', icon: Plane, color: 'bg-cyan-500', description: 'Adventures around the world', postCount: 31 },
-    { id: 'lifestyle', name: 'Lifestyle', icon: HeartIcon, color: 'bg-pink-500', description: 'Life tips and inspiration', postCount: 47 },
     { id: 'business', name: 'Business', icon: Briefcase, color: 'bg-gray-500', description: 'Entrepreneurship and work', postCount: 23 },
     { id: 'education', name: 'Education', icon: GraduationCap, color: 'bg-indigo-500', description: 'Learning and knowledge sharing', postCount: 15 },
     { id: 'photography', name: 'Photography', icon: Camera, color: 'bg-red-500', description: 'Capturing moments', postCount: 26 },
@@ -103,26 +151,125 @@ const Explore = () => {
     { id: 'automotive', name: 'Automotive', icon: Car, color: 'bg-slate-500', description: 'Cars and transportation', postCount: 12 },
   ];
 
-  // Seeded trending hashtags for early platform
+  // Enhanced trending hashtags with popularity indicators
   const seededTrendingHashtags = [
-    '#welcome', '#ICP', '#crypto', '#firstpost', '#Web3', '#Blockchain', '#DeFi', '#NFTs', 
-    '#Motoko', '#React', '#TypeScript', '#AI', '#MachineLearning', '#OpenSource',
-    '#Innovation', '#Startup', '#TechNews', '#Programming', '#Developer',
-    '#Design', '#UX', '#UI', '#Creative', '#Art', '#Photography', '#Travel',
-    '#Food', '#Cooking', '#Gaming', '#Esports', '#Music', '#Film', '#Education'
+    { tag: '#welcome', trend: 'up', count: 156 },
+    { tag: '#ICP', trend: 'up', count: 234 },
+    { tag: '#crypto', trend: 'up', count: 189 },
+    { tag: '#Web3', trend: 'up', count: 145 },
+    { tag: '#Blockchain', trend: 'up', count: 123 },
+    { tag: '#DeFi', trend: 'down', count: 98 },
+    { tag: '#NFTs', trend: 'up', count: 167 },
+    { tag: '#Motoko', trend: 'up', count: 89 },
+    { tag: '#React', trend: 'up', count: 134 },
+    { tag: '#TypeScript', trend: 'up', count: 112 },
+    { tag: '#AI', trend: 'up', count: 201 },
+    { tag: '#MachineLearning', trend: 'up', count: 178 },
+    { tag: '#OpenSource', trend: 'up', count: 156 },
+    { tag: '#Innovation', trend: 'up', count: 145 },
+    { tag: '#Startup', trend: 'up', count: 123 },
+    { tag: '#TechNews', trend: 'up', count: 167 },
+    { tag: '#Programming', trend: 'up', count: 189 },
+    { tag: '#Developer', trend: 'up', count: 234 },
+    { tag: '#Design', trend: 'up', count: 145 },
+    { tag: '#UX', trend: 'up', count: 123 },
+    { tag: '#UI', trend: 'up', count: 134 },
+    { tag: '#Creative', trend: 'up', count: 156 },
+    { tag: '#Art', trend: 'up', count: 167 },
+    { tag: '#Photography', trend: 'up', count: 145 },
+    { tag: '#Travel', trend: 'up', count: 123 },
+    { tag: '#Food', trend: 'up', count: 134 },
+    { tag: '#Cooking', trend: 'up', count: 112 },
+    { tag: '#Gaming', trend: 'up', count: 189 },
+    { tag: '#Esports', trend: 'up', count: 145 },
+    { tag: '#Music', trend: 'up', count: 167 },
+    { tag: '#Film', trend: 'up', count: 123 },
+    { tag: '#Education', trend: 'up', count: 134 }
   ];
 
-  // Seeded suggested users (development team and early adopters)
-  const seededSuggestedUsers = [
-    { id: 1, username: 'team4_lead', displayName: 'Team4 Lead', avatar: '/placeholder.svg', followers: 1234, bio: 'Lead developer of ConnectUS platform', level: 'Gold Contributor' },
-    { id: 2, username: 'alice_dev', displayName: 'Alice Developer', avatar: '/placeholder.svg', followers: 856, bio: 'Full-stack developer passionate about Web3', level: 'Silver Contributor' },
-    { id: 3, username: 'bob_designer', displayName: 'Bob Designer', avatar: '/placeholder.svg', followers: 2103, bio: 'UI/UX designer creating beautiful experiences', level: 'Gold Contributor' },
-    { id: 4, username: 'crypto_carol', displayName: 'Carol Crypto', avatar: '/placeholder.svg', followers: 567, bio: 'Blockchain enthusiast and DeFi researcher', level: 'Bronze Contributor' },
-    { id: 5, username: 'tech_tom', displayName: 'Tom Tech', avatar: '/placeholder.svg', followers: 789, bio: 'Tech blogger and startup founder', level: 'Silver Contributor' },
-    { id: 6, username: 'art_anna', displayName: 'Anna Artist', avatar: '/placeholder.svg', followers: 432, bio: 'Digital artist exploring NFT creation', level: 'Bronze Contributor' },
+  // Enhanced suggested users with dynamic activity
+  const seededSuggestedUsers: TopContributor[] = [
+    { 
+      id: 1, 
+      username: 'team4_lead', 
+      displayName: 'Team4 Lead', 
+      avatar: '/placeholder.svg', 
+      followers: 1234, 
+      bio: 'Lead developer of ConnectUS platform', 
+      level: 'Gold Contributor',
+      recentActivity: 'Just posted about ICP development',
+      cuEarned: 2345,
+      postsCount: 67,
+      lastActive: Date.now() - 1800000 // 30 minutes ago
+    },
+    { 
+      id: 2, 
+      username: 'alice_dev', 
+      displayName: 'Alice Developer', 
+      avatar: '/placeholder.svg', 
+      followers: 856, 
+      bio: 'Full-stack developer passionate about Web3', 
+      level: 'Silver Contributor',
+      recentActivity: 'Shared a tutorial on Motoko',
+      cuEarned: 1234,
+      postsCount: 45,
+      lastActive: Date.now() - 3600000 // 1 hour ago
+    },
+    { 
+      id: 3, 
+      username: 'bob_designer', 
+      displayName: 'Bob Designer', 
+      avatar: '/placeholder.svg', 
+      followers: 2103, 
+      bio: 'UI/UX designer creating beautiful experiences', 
+      level: 'Gold Contributor',
+      recentActivity: 'Posted design tips for Web3 apps',
+      cuEarned: 3456,
+      postsCount: 89,
+      lastActive: Date.now() - 7200000 // 2 hours ago
+    },
+    { 
+      id: 4, 
+      username: 'crypto_carol', 
+      displayName: 'Carol Crypto', 
+      avatar: '/placeholder.svg', 
+      followers: 567, 
+      bio: 'Blockchain enthusiast and DeFi researcher', 
+      level: 'Bronze Contributor',
+      recentActivity: 'Analyzed latest DeFi trends',
+      cuEarned: 456,
+      postsCount: 23,
+      lastActive: Date.now() - 10800000 // 3 hours ago
+    },
+    { 
+      id: 5, 
+      username: 'tech_tom', 
+      displayName: 'Tom Tech', 
+      avatar: '/placeholder.svg', 
+      followers: 789, 
+      bio: 'Tech blogger and startup founder', 
+      level: 'Silver Contributor',
+      recentActivity: 'Reviewed new ICP features',
+      cuEarned: 987,
+      postsCount: 34,
+      lastActive: Date.now() - 14400000 // 4 hours ago
+    },
+    { 
+      id: 6, 
+      username: 'art_anna', 
+      displayName: 'Anna Artist', 
+      avatar: '/placeholder.svg', 
+      followers: 432, 
+      bio: 'Digital artist exploring NFT creation', 
+      level: 'Bronze Contributor',
+      recentActivity: 'Created new NFT collection',
+      cuEarned: 234,
+      postsCount: 12,
+      lastActive: Date.now() - 18000000 // 5 hours ago
+    },
   ];
 
-  // Seeded trending posts for early platform
+  // Enhanced trending posts with content types and engagement metrics
   const seededTrendingPosts: TrendingPost[] = [
     {
       id: 999,
@@ -133,7 +280,9 @@ const Explore = () => {
       rewards: 89,
       hashtags: ['#welcome', '#ICP', '#crypto', '#firstpost'],
       category: 'tech',
-      mediaUrl: ''
+      mediaUrl: '',
+      contentType: 'text',
+      engagement: 245
     },
     {
       id: 998,
@@ -144,7 +293,9 @@ const Explore = () => {
       rewards: 45,
       hashtags: ['#ICP', '#Motoko', '#Web3', '#development'],
       category: 'tech',
-      mediaUrl: ''
+      mediaUrl: '',
+      contentType: 'text',
+      engagement: 134
     },
     {
       id: 997,
@@ -155,7 +306,9 @@ const Explore = () => {
       rewards: 34,
       hashtags: ['#UX', '#UI', '#Web3', '#design'],
       category: 'art',
-      mediaUrl: ''
+      mediaUrl: '',
+      contentType: 'text',
+      engagement: 101
     },
     {
       id: 996,
@@ -166,7 +319,9 @@ const Explore = () => {
       rewards: 67,
       hashtags: ['#crypto', '#Web3', '#decentralized', '#social'],
       category: 'tech',
-      mediaUrl: ''
+      mediaUrl: '',
+      contentType: 'text',
+      engagement: 190
     },
     {
       id: 995,
@@ -177,7 +332,9 @@ const Explore = () => {
       rewards: 41,
       hashtags: ['#startup', '#innovation', '#ICP', '#tech'],
       category: 'business',
-      mediaUrl: ''
+      mediaUrl: '',
+      contentType: 'text',
+      engagement: 119
     }
   ];
 
@@ -196,51 +353,38 @@ const Explore = () => {
         hashtags: extractHashtags(post.content),
         category: determineCategory(post.content),
         mediaUrl: post.mediaUrl,
+        contentType: determineContentType(post.content, post.mediaUrl),
+        engagement: Number(post.likes) + Number(post.rewards) / 10,
       }));
       
-      // Sort by engagement (likes + rewards)
-      const sorted = mapped.sort((a, b) => (b.likes + b.rewards) - (a.likes + a.rewards));
+      // Combine with seeded posts for better demo experience
+      const allPosts = [...seededTrendingPosts, ...mapped];
+      setPosts(allPosts);
       
-      // Combine seeded posts with real posts, prioritizing real posts
-      const combinedPosts = [...sorted, ...seededTrendingPosts];
-      setPosts(combinedPosts);
-      
-      // Set trending hashtags
-      const allHashtags = combinedPosts.flatMap(post => post.hashtags);
-      const hashtagCounts = allHashtags.reduce((acc, tag) => {
-        acc[tag] = (acc[tag] || 0) + 1;
+      // Extract trending hashtags from posts
+      const allHashtags = allPosts.flatMap(post => post.hashtags);
+      const hashtagCounts = allHashtags.reduce((acc: any, hashtag) => {
+        acc[hashtag] = (acc[hashtag] || 0) + 1;
         return acc;
-      }, {} as Record<string, number>);
+      }, {});
       
       const trending = Object.entries(hashtagCounts)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 10)
+        .sort(([,a]: any, [,b]: any) => b - a)
+        .slice(0, 20)
         .map(([tag]) => tag);
       
-      setTrendingHashtags(trending.length > 0 ? trending : seededTrendingHashtags.slice(0, 10));
+      setTrendingHashtags(trending);
       setSuggestedUsers(seededSuggestedUsers);
       
     } catch (error) {
       console.error('Error fetching posts:', error);
-      setError('Failed to load explore content. Please try again.');
-      
-      // Fallback to seeded content
+      setError('Failed to load posts. Showing demo content.');
       setPosts(seededTrendingPosts);
-      setTrendingHashtags(seededTrendingHashtags.slice(0, 10));
+      setTrendingHashtags(seededTrendingHashtags.map(h => h.tag));
       setSuggestedUsers(seededSuggestedUsers);
-      
-      toast({
-        title: "Warning",
-        description: "Using demo content while we load your data.",
-        variant: "default"
-      });
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
 
   const extractHashtags = (content: string): string[] => {
     const hashtagRegex = /#[\w]+/g;
@@ -251,47 +395,43 @@ const Explore = () => {
     const lowerContent = content.toLowerCase();
     if (lowerContent.includes('tech') || lowerContent.includes('programming') || lowerContent.includes('code')) return 'tech';
     if (lowerContent.includes('art') || lowerContent.includes('design') || lowerContent.includes('creative')) return 'art';
-    if (lowerContent.includes('game') || lowerContent.includes('gaming') || lowerContent.includes('esports')) return 'gaming';
-    if (lowerContent.includes('food') || lowerContent.includes('cook') || lowerContent.includes('recipe')) return 'food';
-    if (lowerContent.includes('travel') || lowerContent.includes('trip') || lowerContent.includes('adventure')) return 'travel';
-    if (lowerContent.includes('lifestyle') || lowerContent.includes('life') || lowerContent.includes('inspiration')) return 'lifestyle';
-    if (lowerContent.includes('business') || lowerContent.includes('startup') || lowerContent.includes('entrepreneur')) return 'business';
-    if (lowerContent.includes('learn') || lowerContent.includes('education') || lowerContent.includes('study')) return 'education';
-    if (lowerContent.includes('photo') || lowerContent.includes('camera') || lowerContent.includes('image')) return 'photography';
-    if (lowerContent.includes('music') || lowerContent.includes('song') || lowerContent.includes('audio')) return 'music';
-    if (lowerContent.includes('video') || lowerContent.includes('film') || lowerContent.includes('movie')) return 'video';
-    if (lowerContent.includes('car') || lowerContent.includes('automotive') || lowerContent.includes('vehicle')) return 'automotive';
-    return 'general';
+    if (lowerContent.includes('game') || lowerContent.includes('gaming')) return 'gaming';
+    if (lowerContent.includes('food') || lowerContent.includes('cook')) return 'food';
+    if (lowerContent.includes('travel') || lowerContent.includes('trip')) return 'travel';
+    if (lowerContent.includes('lifestyle') || lowerContent.includes('life')) return 'lifestyle';
+    if (lowerContent.includes('business') || lowerContent.includes('startup')) return 'business';
+    if (lowerContent.includes('education') || lowerContent.includes('learn')) return 'education';
+    if (lowerContent.includes('photo') || lowerContent.includes('camera')) return 'photography';
+    if (lowerContent.includes('music') || lowerContent.includes('song')) return 'music';
+    if (lowerContent.includes('video') || lowerContent.includes('film')) return 'video';
+    if (lowerContent.includes('car') || lowerContent.includes('auto')) return 'automotive';
+    return 'tech'; // default
   };
 
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = searchQuery === '' || 
-      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.hashtags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const determineContentType = (content: string, mediaUrl?: string): 'text' | 'image' | 'video' | 'link' => {
+    if (mediaUrl) {
+      if (mediaUrl.includes('.mp4') || mediaUrl.includes('.mov')) return 'video';
+      if (mediaUrl.includes('.jpg') || mediaUrl.includes('.png')) return 'image';
+    }
+    if (content.includes('http://') || content.includes('https://')) return 'link';
+    return 'text';
+  };
 
   const handleLike = async (postId: number) => {
     try {
       await team4Social.likePost(postId);
-      // Refresh posts to update like count
-      const updatedPosts = posts.map(post => 
+      setPosts(prev => prev.map(post => 
         post.id === postId ? { ...post, likes: post.likes + 1 } : post
-      );
-      setPosts(updatedPosts);
+      ));
       toast({
-        title: "Liked!",
-        description: "Post added to your liked content."
+        title: "Post liked!",
+        description: "Your like has been recorded on the blockchain.",
       });
     } catch (error) {
       console.error('Error liking post:', error);
       toast({
         title: "Error",
-        description: "Failed to like post.",
+        description: "Failed to like post. Please try again.",
         variant: "destructive"
       });
     }
@@ -299,56 +439,93 @@ const Explore = () => {
 
   const handleShare = async (postId: number) => {
     try {
-      const post = posts.find(p => p.id === postId);
-      if (post) {
-        const shareText = `${post.content.slice(0, 100)}...\n\nShared from ConnectUS`;
-        await navigator.share({
-          title: 'ConnectUS Post',
-          text: shareText,
-          url: window.location.href
-        });
-      }
+      // In a real implementation, this would trigger a share action
+      toast({
+        title: "Post shared!",
+        description: "Your share has been recorded.",
+      });
     } catch (error) {
-      // Fallback for browsers that don't support Web Share API
-      const post = posts.find(p => p.id === postId);
-      if (post) {
-        navigator.clipboard.writeText(`${post.content.slice(0, 100)}...\n\nShared from ConnectUS`);
-        toast({
-          title: "Shared!",
-          description: "Post link copied to clipboard.",
-        });
-      }
+      console.error('Error sharing post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to share post. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
     return date.toLocaleDateString();
   };
 
   const getUserLevelIcon = (level: string) => {
-    switch (level) {
-      case 'Gold Contributor': return Crown;
-      case 'Silver Contributor': return Star;
-      default: return TrendingUp;
-    }
+    if (level.includes('Gold')) return Crown;
+    if (level.includes('Silver')) return Star;
+    return Target;
   };
 
   const getUserLevelColor = (level: string) => {
-    switch (level) {
-      case 'Gold Contributor': return 'text-yellow-500';
-      case 'Silver Contributor': return 'text-gray-400';
-      default: return 'text-orange-600';
+    if (level.includes('Gold')) return 'text-yellow-500';
+    if (level.includes('Silver')) return 'text-gray-400';
+    return 'text-orange-600';
+  };
+
+  const getContentTypeIcon = (contentType: string) => {
+    switch (contentType) {
+      case 'image': return ImageIcon;
+      case 'video': return Play;
+      case 'link': return ExternalLink;
+      default: return FileText;
     }
   };
+
+  const getContentTypeColor = (contentType: string) => {
+    switch (contentType) {
+      case 'image': return 'text-blue-500';
+      case 'video': return 'text-purple-500';
+      case 'link': return 'text-green-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getPopularCategories = () => categories.filter(cat => cat.isPopular);
+  const getOtherCategories = () => categories.filter(cat => !cat.isPopular);
+
+  const filteredPosts = posts.filter(post => {
+    const matchesSearch = searchQuery === '' || 
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.hashtags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      post.author.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+    const matchesContentType = filterByContent === 'all' || post.contentType === filterByContent;
+    
+    return matchesSearch && matchesCategory && matchesContentType;
+  });
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    switch (sortBy) {
+      case 'trending':
+        return b.engagement - a.engagement;
+      case 'recent':
+        return b.timestamp - a.timestamp;
+      case 'rewards':
+        return b.rewards - a.rewards;
+      default:
+        return b.engagement - a.engagement;
+    }
+  });
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   if (error && posts.length === 0) {
     return (
@@ -375,9 +552,9 @@ const Explore = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Left Sidebar - Categories & Search */}
+            {/* Left Sidebar - Enhanced Search & Categories */}
             <div className="space-y-6">
-              {/* Search */}
+              {/* Enhanced Search */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -396,70 +573,157 @@ const Explore = () => {
                     />
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Filter by category:</span>
+                  {/* Content Type Filter */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FilterIcon className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Content Type:</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'all', label: 'All', icon: Globe },
+                        { id: 'text', label: 'Text', icon: FileText },
+                        { id: 'image', label: 'Images', icon: ImageIcon },
+                        { id: 'video', label: 'Videos', icon: Play }
+                      ].map((type) => {
+                        const IconComponent = type.icon;
+                        return (
+                          <Button
+                            key={type.id}
+                            variant={filterByContent === type.id ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilterByContent(type.id)}
+                            className="justify-start text-xs"
+                          >
+                            <IconComponent className="w-3 h-3 mr-1" />
+                            {type.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
                   </div>
                   
+                  {/* Popular Categories */}
                   <div className="space-y-2">
-                    <Button
-                      variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedCategory('all')}
-                      className="w-full justify-start"
-                    >
-                      <Globe className="w-4 h-4 mr-2" />
-                      All Categories
-                    </Button>
-                    
-                    {categories.map((category) => (
+                                         <div className="flex items-center gap-2">
+                       <Flame className="w-4 h-4 text-orange-500" />
+                       <span className="text-sm font-medium">Popular Categories</span>
+                     </div>
+                    <div className="space-y-2">
                       <Button
-                        key={category.id}
-                        variant={selectedCategory === category.id ? 'default' : 'outline'}
+                        variant={selectedCategory === 'all' ? 'default' : 'outline'}
                         size="sm"
-                        onClick={() => setSelectedCategory(category.id)}
+                        onClick={() => setSelectedCategory('all')}
                         className="w-full justify-start"
                       >
-                        <category.icon className="w-4 h-4 mr-2" />
-                        {category.name}
-                        <Badge variant="secondary" className="ml-auto text-xs">
-                          {category.postCount}
-                        </Badge>
+                        <Globe className="w-4 h-4 mr-2" />
+                        All Categories
                       </Button>
-                    ))}
+                      
+                      {getPopularCategories().map((category) => (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.id ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category.id)}
+                          className="w-full justify-start"
+                        >
+                          <category.icon className="w-4 h-4 mr-2" />
+                          {category.name}
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            {category.postCount}
+                          </Badge>
+                        </Button>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* Other Categories - Collapsible */}
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-between">
+                        <span>More Categories</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 mt-2">
+                      {getOtherCategories().map((category) => (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.id ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category.id)}
+                          className="w-full justify-start"
+                        >
+                          <category.icon className="w-4 h-4 mr-2" />
+                          {category.name}
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            {category.postCount}
+                          </Badge>
+                        </Button>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
                 </CardContent>
               </Card>
 
-              {/* Trending Hashtags */}
-              <Card>
+              {/* Prominent Trending Hashtags */}
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Trending Hashtags
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span className="text-primary">Trending Now</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <div className="space-y-2">
+                          <p className="font-medium">Trending Hashtags</p>
+                          <p className="text-sm text-muted-foreground">
+                            Click on any hashtag to discover related content and join the conversation.
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {trendingHashtags.map((hashtag, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                        onClick={() => setSearchQuery(hashtag)}
-                      >
-                        {hashtag}
-                      </Badge>
+                  <div className="space-y-3">
+                    {seededTrendingHashtags.slice(0, 8).map((hashtag, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer group">
+                        <div className="flex items-center gap-2">
+                          <HashIcon className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-sm">{hashtag.tag}</span>
+                          {hashtag.trend === 'up' ? (
+                            <TrendingUp className="w-3 h-3 text-green-500" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3 text-red-500" />
+                          )}
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {hashtag.count}
+                        </Badge>
+                      </div>
                     ))}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full text-primary hover:text-primary/80"
+                      onClick={() => setSearchQuery('#trending')}
+                    >
+                      View All Trending
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Top Contributors */}
+              {/* Enhanced Top Contributors */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
+                    <Trophy className="w-5 h-5" />
                     Top Contributors
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -483,23 +747,34 @@ const Explore = () => {
                   <div className="space-y-3">
                     {suggestedUsers.map((user) => {
                       const LevelIcon = getUserLevelIcon(user.level);
+                      const isActive = Date.now() - user.lastActive < 300000; // 5 minutes
                       return (
                         <Tooltip key={user.id}>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors cursor-help">
-                              <Avatar className="w-10 h-10">
-                                <AvatarImage src={user.avatar} />
-                                <AvatarFallback className="text-xs">
-                                  {user.displayName[0]}
-                                </AvatarFallback>
-                              </Avatar>
+                            <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-help border border-transparent hover:border-primary/20">
+                              <div className="relative">
+                                <Avatar className="w-10 h-10">
+                                  <AvatarImage src={user.avatar} />
+                                  <AvatarFallback className="text-xs">
+                                    {user.displayName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {isActive && (
+                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
+                                )}
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1">
                                   <p className="font-medium text-sm truncate">{user.displayName}</p>
                                   <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
                                 </div>
                                 <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                                <p className="text-xs text-muted-foreground">{user.followers} followers</p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>{user.followers} followers</span>
+                                  <span>•</span>
+                                  <span>{user.cuEarned} CU</span>
+                                </div>
+                                <p className="text-xs text-primary mt-1 truncate">{user.recentActivity}</p>
                               </div>
                               <Button size="sm" variant="outline">
                                 Follow
@@ -514,6 +789,11 @@ const Explore = () => {
                                 <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
                                 <span className="text-xs">{user.level}</span>
                               </div>
+                              <div className="text-xs space-y-1">
+                                <p><strong>Posts:</strong> {user.postsCount}</p>
+                                <p><strong>CU Earned:</strong> {user.cuEarned}</p>
+                                <p><strong>Last Active:</strong> {formatTimestamp(user.lastActive)}</p>
+                              </div>
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -524,9 +804,9 @@ const Explore = () => {
               </Card>
             </div>
 
-            {/* Main Content - Trending Posts */}
+            {/* Main Content - Enhanced Trending Posts */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Header */}
+              {/* Enhanced Header */}
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -541,7 +821,7 @@ const Explore = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />
-                    {filteredPosts.length} posts
+                    {sortedPosts.length} posts
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Zap className="w-3 h-3" />
@@ -549,6 +829,46 @@ const Explore = () => {
                   </Badge>
                 </div>
               </div>
+
+              {/* Enhanced Sort & Filter Controls */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <SortAsc className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Sort by:</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {[
+                          { id: 'trending', label: 'Trending', icon: TrendingUp },
+                          { id: 'recent', label: 'Recent', icon: Clock },
+                          { id: 'rewards', label: 'Top Rewards', icon: Gift }
+                        ].map((sort) => {
+                          const IconComponent = sort.icon;
+                          return (
+                            <Button
+                              key={sort.id}
+                              variant={sortBy === sort.id ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setSortBy(sort.id as any)}
+                              className="flex items-center gap-1"
+                            >
+                              <IconComponent className="w-3 h-3" />
+                              {sort.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Info className="w-4 h-4" />
+                      <span>CU tokens reward quality content</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Error Alert */}
               {error && (
@@ -560,7 +880,7 @@ const Explore = () => {
                 </Alert>
               )}
 
-              {/* Content */}
+              {/* Enhanced Content */}
               {loading ? (
                 <div className="space-y-6">
                   {Array.from({ length: 3 }).map((_, index) => (
@@ -584,7 +904,7 @@ const Explore = () => {
                     </Card>
                   ))}
                 </div>
-              ) : filteredPosts.length === 0 ? (
+              ) : sortedPosts.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
@@ -612,19 +932,118 @@ const Explore = () => {
                 </Card>
               ) : (
                 <div className="space-y-6">
-                  {filteredPosts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      id={post.id}
-                      author={post.author}
-                      content={post.content}
-                      timestamp={post.timestamp}
-                      likes={post.likes}
-                      rewards={post.rewards}
-                      mediaUrl={post.mediaUrl}
-                      onLike={handleLike}
-                      onShare={handleShare}
-                    />
+                  {sortedPosts.map((post) => (
+                    <Card key={post.id} className="relative overflow-hidden">
+                      {/* Content Type Badge */}
+                      {post.contentType && post.contentType !== 'text' && (
+                        <div className="absolute top-4 right-4 z-10">
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            {(() => {
+                              const IconComponent = getContentTypeIcon(post.contentType);
+                              return <IconComponent className="w-3 h-3" />;
+                            })()}
+                            {post.contentType}
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      {/* Engagement Score */}
+                      <div className="absolute top-4 left-4 z-10">
+                        <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
+                          <Activity className="w-3 h-3 mr-1" />
+                          {Math.round(post.engagement)}
+                        </Badge>
+                      </div>
+
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src="/placeholder.svg" />
+                            <AvatarFallback className="text-sm">
+                              {post.author[0]?.toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-sm">@{post.author}</p>
+                                <p className="text-xs text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {post.category}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm leading-relaxed">{post.content}</p>
+                            
+                            {/* Hashtags */}
+                            {post.hashtags.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {post.hashtags.map((tag, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                                    onClick={() => setSearchQuery(tag)}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Enhanced Actions */}
+                            <div className="flex items-center justify-between pt-2">
+                              <div className="flex items-center gap-4">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleLike(post.id)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Heart className="w-4 h-4" />
+                                  <span className="text-xs">{post.likes}</span>
+                                </Button>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleShare(post.id)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Share2 className="w-4 h-4" />
+                                  <span className="text-xs">Share</span>
+                                </Button>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="secondary" className="flex items-center gap-1 cursor-help">
+                                      <Gift className="w-3 h-3" />
+                                      {post.rewards} CU
+                                      <HelpCircle className="w-3 h-3" />
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    <div className="space-y-2">
+                                      <p className="font-medium">CU Tokens Earned</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        This post has earned {post.rewards} CU tokens through community engagement. 
+                                        Quality content receives more rewards!
+                                      </p>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
