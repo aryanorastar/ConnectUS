@@ -18,12 +18,15 @@ import {
   Gift,
   Plus,
   Activity,
-  Zap
+  Zap,
+  User
 } from 'lucide-react';
 
 interface Post {
   id: number;
   author: string;
+  displayName?: string;
+  username?: string;
   content: string;
   timestamp: number;
   likes: number;
@@ -49,6 +52,31 @@ const Feed = () => {
   const [commentInput, setCommentInput] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // Mock user data for display names (in production, fetch from user profiles)
+  const getUserDisplayInfo = (principalId: string) => {
+    // Mock user mapping - in production, this would come from user profiles
+    const userMap: Record<string, { displayName: string; username: string }> = {
+      'team4_lead': { displayName: 'Team4 Lead', username: 'team4_lead' },
+      'alice_dev': { displayName: 'Alice Developer', username: 'alice_dev' },
+      'bob_designer': { displayName: 'Bob Designer', username: 'bob_designer' },
+      'crypto_carol': { displayName: 'Carol Crypto', username: 'crypto_carol' },
+      'tech_tom': { displayName: 'Tom Tech', username: 'tech_tom' },
+      'art_anna': { displayName: 'Anna Artist', username: 'art_anna' }
+    };
+
+    // Check if it's a known user
+    if (userMap[principalId]) {
+      return userMap[principalId];
+    }
+
+    // For unknown users, create a friendly display name from the principal ID
+    const shortId = principalId.length > 8 ? principalId.slice(0, 8) + '...' : principalId;
+    return {
+      displayName: `User ${shortId}`,
+      username: principalId
+    };
+  };
+
   // Fetch posts from the canister
   const fetchPosts = async () => {
     setLoading(true);
@@ -56,15 +84,22 @@ const Feed = () => {
     try {
       const canisterPosts = await team4Social.getPosts();
       // Map backend posts to frontend format
-      const mapped = (canisterPosts as any[]).map((post: any) => ({
-        id: Number(post.id),
-        author: post.author.toText ? post.author.toText() : String(post.author),
-        content: post.content,
-        timestamp: Number(post.timestamp),
-        likes: Number(post.likes),
-        rewards: Number(post.rewards),
-        mediaUrl: post.mediaUrl,
-      }));
+      const mapped = (canisterPosts as any[]).map((post: any) => {
+        const principalId = post.author.toText ? post.author.toText() : String(post.author);
+        const userInfo = getUserDisplayInfo(principalId);
+        
+        return {
+          id: Number(post.id),
+          author: principalId,
+          displayName: userInfo.displayName,
+          username: userInfo.username,
+          content: post.content,
+          timestamp: Number(post.timestamp),
+          likes: Number(post.likes),
+          rewards: Number(post.rewards),
+          mediaUrl: post.mediaUrl,
+        };
+      });
       
       // Sort posts based on current filter
       let sortedPosts = mapped.reverse();
@@ -85,10 +120,13 @@ const Feed = () => {
       
       // Calculate network stats with a slight delay to show loading state
       setTimeout(() => {
+        const uniqueUsers = new Set(sortedPosts.map(p => p.author));
+        const totalRewards = sortedPosts.reduce((sum, post) => sum + post.rewards, 0);
+        
         setNetworkStats({
           totalPosts: sortedPosts.length,
-          activeUsers: sortedPosts.length > 0 ? new Set(sortedPosts.map(p => p.author)).size : 0,
-          cuDistributed: sortedPosts.reduce((sum, post) => sum + post.rewards, 0)
+          activeUsers: uniqueUsers.size,
+          cuDistributed: totalRewards
         });
         setStatsLoading(false);
       }, 500);
@@ -388,7 +426,7 @@ const Feed = () => {
                   <PostCard
                     key={post.id}
                     id={post.id}
-                    author={post.author}
+                    author={post.displayName || post.author}
                     content={post.content}
                     timestamp={post.timestamp}
                     likes={post.likes}

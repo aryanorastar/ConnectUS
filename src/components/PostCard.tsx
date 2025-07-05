@@ -65,16 +65,32 @@ const PostCard = ({
   const { toast } = useToast();
 
   const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return date.toLocaleDateString();
+    try {
+      // Ensure timestamp is a valid number
+      if (!timestamp || isNaN(timestamp)) {
+        return 'Just now';
+      }
+
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Just now';
+      }
+
+      const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+      
+      if (diffInSeconds < 60) return 'Just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return 'Just now';
+    }
   };
 
   const extractHashtags = (content: string) => {
@@ -154,6 +170,22 @@ const PostCard = ({
   const mentions = extractMentions(content);
   const links = extractLinks(content);
 
+  // Get display name and username from author
+  const getAuthorInfo = (author: string) => {
+    // Check if author contains a username (e.g., "Display Name @username")
+    const usernameMatch = author.match(/@(\w+)$/);
+    if (usernameMatch) {
+      const displayName = author.replace(/@\w+$/, '').trim();
+      const username = usernameMatch[1];
+      return { displayName, username };
+    }
+    
+    // If no username found, use the author as display name
+    return { displayName: author, username: author };
+  };
+
+  const { displayName, username } = getAuthorInfo(author);
+
   return (
     <Card className="hover:shadow-lg transition-all duration-200 border-border/50">
       <CardContent className="p-6">
@@ -163,13 +195,13 @@ const PostCard = ({
             <Avatar className="w-12 h-12">
               <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="bg-gradient-to-tr from-indigo-500 to-purple-400 text-white font-semibold">
-                {author[0]?.toUpperCase() || 'U'}
+                {displayName[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm truncate">{author}</span>
+                <span className="font-semibold text-sm truncate">{displayName}</span>
                 <Badge variant="outline" size="sm" className="text-xs">
                   <User className="w-3 h-3 mr-1" />
                   User
@@ -178,6 +210,12 @@ const PostCard = ({
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 {formatTimestamp(timestamp)}
+                {username !== displayName && (
+                  <>
+                    <span>•</span>
+                    <span className="text-muted-foreground">@{username}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -200,18 +238,18 @@ const PostCard = ({
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setShowFullContent(true)}
-                className="text-primary hover:text-primary/80 p-0 h-auto"
+                className="text-primary hover:text-primary/80"
               >
                 Show more
               </Button>
             )}
             
-            {showFullContent && shouldTruncate && (
+            {shouldTruncate && showFullContent && (
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setShowFullContent(false)}
-                className="text-primary hover:text-primary/80 p-0 h-auto"
+                className="text-primary hover:text-primary/80"
               >
                 Show less
               </Button>
@@ -220,15 +258,12 @@ const PostCard = ({
 
           {/* Media Content */}
           {mediaUrl && (
-            <div className="rounded-lg overflow-hidden bg-muted/30">
+            <div className="rounded-lg overflow-hidden">
               {getMediaType(mediaUrl) === 'image' ? (
                 <img 
                   src={mediaUrl} 
                   alt="Post media" 
                   className="w-full max-h-96 object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
                 />
               ) : getMediaType(mediaUrl) === 'video' ? (
                 <video 
@@ -237,164 +272,122 @@ const PostCard = ({
                   className="w-full max-h-96 object-cover"
                 />
               ) : (
-                <div className="p-4 text-center">
-                  <FileText className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Media attachment</p>
+                <div className="p-4 bg-muted rounded-lg flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm">Media attachment</span>
                 </div>
               )}
             </div>
           )}
 
-          {/* Content Indicators */}
-          {(hashtags.length > 0 || mentions.length > 0 || links.length > 0) && (
-            <div className="flex flex-wrap gap-2 text-xs">
-              {hashtags.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <Hash className="w-3 h-3 text-blue-500" />
-                  <span className="text-muted-foreground">{hashtags.length} hashtags</span>
-                </div>
-              )}
-              {mentions.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <User className="w-3 h-3 text-purple-500" />
-                  <span className="text-muted-foreground">{mentions.length} mentions</span>
-                </div>
-              )}
-              {links.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <LinkIcon className="w-3 h-3 text-green-500" />
-                  <span className="text-muted-foreground">{links.length} links</span>
-                </div>
-              )}
+          {/* Hashtags */}
+          {hashtags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {hashtags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
             </div>
           )}
-        </div>
 
-        {/* Engagement Stats */}
-        <div className="flex items-center justify-between pt-4 border-t border-border/50">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <ThumbsUp className="w-4 h-4" />
-              <span>{likes} likes</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MessageCircle className="w-4 h-4" />
-              <span>{comments.length} comments</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Share2 className="w-4 h-4" />
-              <span>{Math.floor(Math.random() * 10)} shares</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              <Award className="w-3 h-3 mr-1" />
-              {rewards} CU
-            </Badge>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4">
-          <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleLike}
-              className={`flex items-center gap-2 ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
-            >
-              <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-              Like
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleOpenComments}
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Comment
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleShare}
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-            >
-              <Share2 className="w-4 h-4" />
-              Share
-            </Button>
-          </div>
-        </div>
-
-        {/* Comments Section */}
-        {openComments === id && (
-          <div className="pt-4 border-t border-border/50 space-y-4">
-            <div className="space-y-3">
-              {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback className="text-xs">
-                        {comment.author?.[0]?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">{comment.author || 'Anonymous'}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimestamp(comment.timestamp || Date.now())}
-                        </span>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-4">
-                  <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">No comments yet</p>
-                  <p className="text-xs text-muted-foreground">Be the first to comment!</p>
-                </div>
-              )}
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between pt-4 border-t border-border/50">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLike}
+                className={`flex items-center gap-2 ${isLiked ? 'text-red-500' : 'text-muted-foreground'}`}
+              >
+                <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                <span className="text-sm">{likes}</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleOpenComments}
+                className="flex items-center gap-2 text-muted-foreground"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-sm">{comments.length}</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleShare}
+                className="flex items-center gap-2 text-muted-foreground"
+              >
+                <Share2 className="w-4 h-4" />
+              </Button>
             </div>
             
-            {/* Add Comment */}
             <div className="flex items-center gap-2">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="text-xs">U</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 relative">
+              <Badge variant="outline" className="text-xs">
+                <Award className="w-3 h-3 mr-1" />
+                {rewards} CU
+              </Badge>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          {openComments === id && (
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <h4 className="font-semibold text-sm">Comments</h4>
+              
+              {commentLoading ? (
+                <div className="text-center py-4">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                </div>
+              ) : comments.length > 0 ? (
+                <div className="space-y-3">
+                  {comments.map((comment, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src="/placeholder.svg" />
+                        <AvatarFallback className="text-xs">
+                          {comment.author?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{comment.author || 'Anonymous'}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatTimestamp(comment.timestamp || Date.now())}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No comments yet. Be the first to comment!
+                </p>
+              )}
+              
+              {/* Add Comment */}
+              <div className="flex gap-2">
                 <Input
+                  placeholder="Add a comment..."
                   value={commentInput}
                   onChange={(e) => setCommentInput?.(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="pr-10"
-                                     onKeyPress={(e) => {
-                     if (e.key === 'Enter' && !e.shiftKey) {
-                       e.preventDefault();
-                       handleAddCommentLocal();
-                     }
-                   }}
+                  className="flex-1"
                 />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                <Button 
+                  size="sm" 
                   onClick={handleAddCommentLocal}
-                  disabled={commentLoading || !commentInput.trim()}
+                  disabled={!commentInput.trim() || commentLoading}
                 >
-                  <Send className="w-3 h-3" />
+                  <Send className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );
