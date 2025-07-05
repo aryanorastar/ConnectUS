@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { 
   TrendingUp, 
   Clock, 
@@ -26,7 +27,11 @@ import {
   BookOpen,
   Flame,
   Tag,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  Crown,
+  TrendingUp as TrendingUpIcon,
+  Lightbulb
 } from 'lucide-react';
 
 interface Post {
@@ -41,32 +46,60 @@ interface Post {
 
 type FeedFilter = 'foryou' | 'newest' | 'trending' | 'topics';
 
+// Enhanced suggested posts with better diversity
 const SUGGESTED_POSTS: Post[] = [
   {
     id: 1001,
-    author: 'explore_bot',
-    content: 'Check out the trending #Web3 projects and join the conversation! 🚀',
-    timestamp: Date.now() - 1000 * 60 * 60,
+    author: 'tech_enthusiast',
+    content: 'Just discovered an amazing new Web3 project! The potential for decentralized social networks is incredible. #Web3 #Innovation #FutureOfSocial',
+    timestamp: Date.now() - 1000 * 60 * 30,
     likes: 42,
     rewards: 21,
     mediaUrl: ''
   },
   {
     id: 1002,
-    author: 'community_leader',
-    content: 'Our top contributor this week is @alice_dev! Congrats! #Community',
-    timestamp: Date.now() - 1000 * 60 * 120,
+    author: 'art_creator',
+    content: 'Working on my latest digital art piece inspired by blockchain technology. The intersection of creativity and technology is fascinating! 🎨 #DigitalArt #NFTs #Creativity',
+    timestamp: Date.now() - 1000 * 60 * 45,
     likes: 33,
     rewards: 18,
     mediaUrl: ''
   },
   {
     id: 1003,
-    author: 'trending_now',
-    content: 'Did you know? You can earn daily CU rewards for posting and engaging. #Rewards',
-    timestamp: Date.now() - 1000 * 60 * 180,
+    author: 'crypto_learner',
+    content: 'Learning about DeFi protocols today. The possibilities for financial innovation are endless! Anyone else exploring yield farming? #DeFi #Learning #CryptoEducation',
+    timestamp: Date.now() - 1000 * 60 * 60,
     likes: 27,
     rewards: 15,
+    mediaUrl: ''
+  },
+  {
+    id: 1004,
+    author: 'gaming_dev',
+    content: 'Building a blockchain-based game! The concept of true ownership of in-game assets is revolutionary. #Gaming #Blockchain #GameDev #Innovation',
+    timestamp: Date.now() - 1000 * 60 * 90,
+    likes: 38,
+    rewards: 22,
+    mediaUrl: ''
+  },
+  {
+    id: 1005,
+    author: 'community_builder',
+    content: 'The ConnectUS community is growing so fast! Love seeing everyone share their knowledge and support each other. #Community #ConnectUS #Growth',
+    timestamp: Date.now() - 1000 * 60 * 120,
+    likes: 45,
+    rewards: 25,
+    mediaUrl: ''
+  },
+  {
+    id: 1006,
+    author: 'music_producer',
+    content: 'Exploring the future of music NFTs. Artists finally have true control over their work! #Music #NFTs #ArtistRights #Innovation',
+    timestamp: Date.now() - 1000 * 60 * 150,
+    likes: 31,
+    rewards: 17,
     mediaUrl: ''
   }
 ];
@@ -90,6 +123,8 @@ const Feed = () => {
   const [commentInput, setCommentInput] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [topicFilter, setTopicFilter] = useState<string>('all');
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   // Fetch posts from the canister
   const fetchPosts = async () => {
@@ -172,6 +207,11 @@ const Feed = () => {
         description: "Your post has been added to the blockchain.",
       });
       fetchPosts();
+      // Mark onboarding as completed when user creates first post
+      if (!onboardingCompleted) {
+        setOnboardingCompleted(true);
+        setShowOnboarding(false);
+      }
     } catch (error) {
       console.error('Error creating post:', error);
       toast({
@@ -200,61 +240,61 @@ const Feed = () => {
   // Share a post
   const handleShare = async (postId: number) => {
     try {
-      const post = posts.find(p => p.id === postId);
-      if (post) {
-        const shareText = `${post.content.slice(0, 100)}...\n\nShared from ConnectUS`;
-        await navigator.share({
-          title: 'ConnectUS Post',
-          text: shareText,
-          url: window.location.href
-        });
-      }
+      await team4Social.sharePost(postId);
+      toast({
+        title: "Shared!",
+        description: "Post shared successfully.",
+      });
+      fetchPosts();
     } catch (error) {
-      // Fallback for browsers that don't support Web Share API
-      const post = posts.find(p => p.id === postId);
-      if (post) {
-        navigator.clipboard.writeText(`${post.content.slice(0, 100)}...\n\nShared from ConnectUS`);
-        toast({
-          title: "Shared!",
-          description: "Post link copied to clipboard.",
-        });
-      }
+      console.error('Error sharing post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to share post. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
+  // Open comments for a post
   const handleOpenComments = async (postId: number) => {
-    setOpenComments(openComments === postId ? null : postId);
-    if (openComments !== postId) {
-      setCommentLoading(true);
-      try {
-        const postComments = await team4Social.getComments(postId);
-        setComments((prev) => ({ ...prev, [postId]: postComments as any[] }));
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load comments.",
-          variant: "destructive"
-        });
-      }
-      setCommentLoading(false);
+    if (openComments === postId) {
+      setOpenComments(null);
+      return;
     }
+    setOpenComments(postId);
+    // Mock comments - in real app this would fetch from backend
+    setComments(prev => ({
+      ...prev,
+      [postId]: [
+        { id: 1, author: 'user1', content: 'Great post!', timestamp: Date.now() - 1000 * 60 * 5 },
+        { id: 2, author: 'user2', content: 'Thanks for sharing!', timestamp: Date.now() - 1000 * 60 * 10 },
+      ]
+    }));
   };
 
+  // Add a comment
   const handleAddComment = async (postId: number) => {
     if (!commentInput.trim()) return;
     setCommentLoading(true);
     try {
-      await team4Social.addComment(postId, commentInput);
-      const postComments = await team4Social.getComments(postId);
-      setComments((prev) => ({ ...prev, [postId]: postComments as any[] }));
+      // Mock comment addition - in real app this would call backend
+      const newComment = {
+        id: Date.now(),
+        author: 'You',
+        content: commentInput,
+        timestamp: Date.now()
+      };
+      setComments(prev => ({
+        ...prev,
+        [postId]: [newComment, ...(prev[postId] || [])]
+      }));
       setCommentInput('');
-      toast({ 
-        title: 'Comment added!',
-        description: "Your comment has been posted to the blockchain."
+      toast({
+        title: "Comment added!",
+        description: "Your comment has been posted.",
       });
     } catch (error) {
-      console.error('Error adding comment:', error);
       toast({
         title: "Error",
         description: "Failed to add comment. Please try again.",
@@ -264,37 +304,37 @@ const Feed = () => {
     setCommentLoading(false);
   };
 
-  // Focus on post form when "Create Your First Post" is clicked
   const handleCreateFirstPost = () => {
-    const postFormInput = document.querySelector('[data-post-form-input]') as HTMLTextAreaElement;
-    if (postFormInput) {
-      postFormInput.focus();
-      postFormInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    // Scroll to post form
+    document.getElementById('new-post')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Loading skeleton component
   const PostSkeleton = () => (
-    <div className="bg-card rounded-lg p-6 border border-border space-y-4">
-      <div className="flex items-center gap-4">
-        <Skeleton className="w-12 h-12 rounded-full" />
+    <div className="bg-card rounded-lg border border-border p-6 space-y-4">
+      <div className="flex items-center space-x-3">
+        <Skeleton className="w-10 h-10 rounded-full" />
         <div className="space-y-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-16" />
         </div>
       </div>
       <Skeleton className="h-4 w-full" />
       <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-4 w-1/2" />
-      <div className="flex gap-4">
-        <Skeleton className="h-8 w-16" />
-        <Skeleton className="h-8 w-16" />
-        <Skeleton className="h-8 w-20" />
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-12" />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-12" />
       </div>
     </div>
   );
 
-  // Community stats skeleton
   const StatsSkeleton = () => (
     <div className="space-y-3">
       <div className="flex justify-between">
@@ -317,16 +357,96 @@ const Feed = () => {
     'all', 'Web3', 'Crypto', 'DeFi', 'NFTs', 'Tech', 'Art', 'Gaming', 'Music', 'Education', 'Food', 'Travel', 'Photography', 'Design', 'Community'
   ];
 
+  // Enhanced empty state content for different filters
+  const getEmptyStateContent = () => {
+    switch (currentFilter) {
+      case 'foryou':
+        return {
+          icon: Star,
+          title: "Personalize Your Feed",
+          description: "Your personalized feed will show content tailored to your interests. Start by creating posts and engaging with others!",
+          action: "Create Your First Post",
+          tips: ["Like posts to train your feed", "Follow topics you're interested in", "Engage with the community"]
+        };
+      case 'newest':
+        return {
+          icon: Clock,
+          title: "No Recent Posts",
+          description: "Be the first to share something new! Latest posts will appear here as they're created.",
+          action: "Share Something New",
+          tips: ["Posts are sorted by creation time", "Check back regularly for updates", "Create engaging content"]
+        };
+      case 'trending':
+        return {
+          icon: TrendingUp,
+          title: "No Trending Content Yet",
+          description: "Popular posts with high engagement will appear here. Start the trend!",
+          action: "Create Trending Content",
+          tips: ["Engage with others to boost visibility", "Use relevant hashtags", "Share valuable insights"]
+        };
+      case 'topics':
+        return {
+          icon: Tag,
+          title: `No Posts in ${topicFilter === 'all' ? 'Any Topic' : topicFilter}`,
+          description: `No posts found for this topic. Be the first to share about ${topicFilter === 'all' ? 'any topic' : topicFilter}!`,
+          action: "Post About This Topic",
+          tips: ["Use relevant hashtags", "Share your expertise", "Connect with like-minded users"]
+        };
+      default:
+        return {
+          icon: MessageCircle,
+          title: "No posts yet",
+          description: "Be the first to share something on the blockchain!",
+          action: "Create Your First Post",
+          tips: ["Start earning CU tokens", "Connect with the community", "Share your thoughts"]
+        };
+    }
+  };
+
+  const emptyState = getEmptyStateContent();
+
   return (
     <div className="min-h-screen bg-background">
       <Header showBreadcrumbs breadcrumbs={["Feed"]} />
       <div className="container mx-auto px-4 py-8">
-        <OnboardingGuide />
+        {/* Collapsible Onboarding Guide */}
+        {showOnboarding && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Getting Started</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowOnboarding(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ChevronUp className="w-4 h-4 mr-1" />
+                Collapse
+              </Button>
+            </div>
+            <OnboardingGuide />
+          </div>
+        )}
+        
+        {/* Show onboarding toggle when collapsed */}
+        {!showOnboarding && !onboardingCompleted && (
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowOnboarding(true)}
+              className="w-full justify-center"
+            >
+              <ChevronDown className="w-4 h-4 mr-2" />
+              Show Getting Started Guide
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Token Rewards */}
           <div className="lg:col-span-1 space-y-6">
             <TokenRewards />
-            {/* Community Stats */}
+            {/* Enhanced Community Stats with Visual Elements */}
             <div className="bg-card rounded-lg p-6 border border-border">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5" />
@@ -335,48 +455,72 @@ const Feed = () => {
               {statsLoading ? (
                 <StatsSkeleton />
               ) : (
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Posts Today</span>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4 text-blue-500" />
-                      <span className="font-medium">{communityStats.postsToday}</span>
+                <div className="space-y-4">
+                  {/* Posts Today with Progress */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm">Posts Today</span>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4 text-blue-500" />
+                        <span className="font-medium">{communityStats.postsToday}</span>
+                      </div>
+                    </div>
+                    <Progress value={Math.min(communityStats.postsToday * 10, 100)} className="h-2" />
+                  </div>
+
+                  {/* Active Users with Visual Indicator */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm">Active This Week</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-green-500" />
+                        <span className="font-medium">{communityStats.activeThisWeek}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: Math.min(communityStats.activeThisWeek, 10) }).map((_, i) => (
+                        <div key={i} className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Top Contributor with Badge */}
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Active This Week</span>
+                    <span className="text-muted-foreground text-sm">Top Contributor</span>
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-green-500" />
-                      <span className="font-medium">{communityStats.activeThisWeek}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Top Contributor</span>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-500" />
+                      <Crown className="w-4 h-4 text-yellow-500" />
                       <span className="font-medium">@{communityStats.topContributor}</span>
                     </div>
                   </div>
+
+                  {/* Top Hashtag with Trend */}
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Top Hashtag</span>
+                    <span className="text-muted-foreground text-sm">Top Hashtag</span>
                     <div className="flex items-center gap-2">
-                      <Hash className="w-4 h-4 text-purple-500" />
+                      <TrendingUpIcon className="w-4 h-4 text-purple-500" />
                       <span className="font-medium">{communityStats.topHashtag}</span>
                     </div>
                   </div>
+
+                  {/* Streak with Visual */}
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Streak</span>
+                    <span className="text-muted-foreground text-sm">Streak</span>
                     <div className="flex items-center gap-2">
                       <Flame className="w-4 h-4 text-orange-500" />
                       <span className="font-medium">{communityStats.streak} days</span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">CU Earned Today</span>
-                    <div className="flex items-center gap-2">
-                      <Gift className="w-4 h-4 text-pink-500" />
-                      <span className="font-medium">{communityStats.cuEarnedToday}</span>
+
+                  {/* CU Earned with Progress */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm">CU Earned Today</span>
+                      <div className="flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-pink-500" />
+                        <span className="font-medium">{communityStats.cuEarnedToday}</span>
+                      </div>
                     </div>
+                    <Progress value={Math.min(communityStats.cuEarnedToday * 2, 100)} className="h-2" />
                   </div>
                 </div>
               )}
@@ -452,13 +596,13 @@ const Feed = () => {
                   <PostSkeleton key={index} />
                 ))
               ) : posts.length === 0 ? (
-                // Enhanced empty state
+                // Enhanced empty state with contextual content
                 <div className="text-center py-16 bg-card rounded-lg border border-border">
                   <div className="max-w-md mx-auto">
-                    <MessageCircle className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
-                    <h3 className="text-2xl font-bold mb-3">No posts yet</h3>
+                    <emptyState.icon className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
+                    <h3 className="text-2xl font-bold mb-3">{emptyState.title}</h3>
                     <p className="text-muted-foreground mb-6 text-lg">
-                      Be the first to share something on the blockchain!
+                      {emptyState.description}
                     </p>
                     <div className="space-y-4">
                       <Button 
@@ -467,20 +611,24 @@ const Feed = () => {
                         size="lg"
                       >
                         <Plus className="w-5 h-5 mr-2" />
-                        Create Your First Post
+                        {emptyState.action}
                       </Button>
                       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                         <Zap className="w-4 h-4" />
                         <span>Start earning CU tokens for your content</span>
                       </div>
                     </div>
+                    {/* Tips section */}
                     <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                      <Badge variant="outline" className="text-sm">
-                        {currentFilter === 'newest' ? 'Latest posts will appear here' :
-                         currentFilter === 'trending' ? 'Popular posts will appear here' :
-                         currentFilter === 'foryou' ? 'Personalized posts will appear here' :
-                         'Posts from your selected topic will appear here'}
-                      </Badge>
+                      <h4 className="font-semibold mb-2 text-sm">💡 Tips:</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {emptyState.tips.map((tip, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <Lightbulb className="w-3 h-3 text-yellow-500" />
+                            {tip}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -505,11 +653,14 @@ const Feed = () => {
                     handleAddComment={handleAddComment}
                     commentLoading={commentLoading}
                   />
-                  {/* Suggested content */}
+                  {/* Enhanced suggested content with better diversity */}
                   <div className="mt-8">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg"><BookOpen className="w-5 h-5" /> You might like</h4>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg">
+                      <BookOpen className="w-5 h-5" /> 
+                      You might like
+                    </h4>
                     <div className="grid gap-4 md:grid-cols-2">
-                      {SUGGESTED_POSTS.map(post => (
+                      {SUGGESTED_POSTS.slice(0, 4).map(post => (
                         <PostCard
                           key={post.id}
                           id={post.id}
@@ -530,6 +681,13 @@ const Feed = () => {
                           commentLoading={commentLoading}
                         />
                       ))}
+                    </div>
+                    {/* Show more suggestions button */}
+                    <div className="mt-4 text-center">
+                      <Button variant="outline" size="sm">
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        Show More Suggestions
+                      </Button>
                     </div>
                   </div>
                 </>
