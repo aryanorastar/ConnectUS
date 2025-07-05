@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { team4Social } from '@/lib/icp';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -39,7 +40,11 @@ import {
   Heart as HeartIcon,
   MessageSquare,
   ThumbsUp,
-  Award
+  Award,
+  RefreshCw,
+  AlertCircle,
+  Plus,
+  Crown
 } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 
@@ -67,6 +72,7 @@ interface Category {
 const Explore = () => {
   const [posts, setPosts] = useState<TrendingPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
@@ -89,70 +95,142 @@ const Explore = () => {
     { id: 'automotive', name: 'Automotive', icon: Car, color: 'bg-slate-500', description: 'Cars and transportation', postCount: 12 },
   ];
 
-  // Mock trending hashtags
-  const mockTrendingHashtags = [
-    '#Web3', '#Blockchain', '#DeFi', '#NFTs', '#Crypto', '#ICP', '#Motoko', 
-    '#React', '#TypeScript', '#AI', '#MachineLearning', '#OpenSource',
+  // Seeded trending hashtags for early platform
+  const seededTrendingHashtags = [
+    '#welcome', '#ICP', '#crypto', '#firstpost', '#Web3', '#Blockchain', '#DeFi', '#NFTs', 
+    '#Motoko', '#React', '#TypeScript', '#AI', '#MachineLearning', '#OpenSource',
     '#Innovation', '#Startup', '#TechNews', '#Programming', '#Developer',
     '#Design', '#UX', '#UI', '#Creative', '#Art', '#Photography', '#Travel',
     '#Food', '#Cooking', '#Gaming', '#Esports', '#Music', '#Film', '#Education'
   ];
 
-  // Mock suggested users
-  const mockSuggestedUsers = [
-    { id: 1, username: 'alice_dev', displayName: 'Alice Developer', avatar: '/placeholder.svg', followers: 1234, bio: 'Full-stack developer passionate about Web3' },
-    { id: 2, username: 'bob_designer', displayName: 'Bob Designer', avatar: '/placeholder.svg', followers: 856, bio: 'UI/UX designer creating beautiful experiences' },
-    { id: 3, username: 'crypto_carol', displayName: 'Carol Crypto', avatar: '/placeholder.svg', followers: 2103, bio: 'Blockchain enthusiast and DeFi researcher' },
-    { id: 4, username: 'tech_tom', displayName: 'Tom Tech', avatar: '/placeholder.svg', followers: 567, bio: 'Tech blogger and startup founder' },
-    { id: 5, username: 'art_anna', displayName: 'Anna Artist', avatar: '/placeholder.svg', followers: 789, bio: 'Digital artist exploring NFT creation' },
+  // Seeded suggested users (development team and early adopters)
+  const seededSuggestedUsers = [
+    { id: 1, username: 'team4_lead', displayName: 'Team4 Lead', avatar: '/placeholder.svg', followers: 1234, bio: 'Lead developer of ConnectUS platform', level: 'Gold Contributor' },
+    { id: 2, username: 'alice_dev', displayName: 'Alice Developer', avatar: '/placeholder.svg', followers: 856, bio: 'Full-stack developer passionate about Web3', level: 'Silver Contributor' },
+    { id: 3, username: 'bob_designer', displayName: 'Bob Designer', avatar: '/placeholder.svg', followers: 2103, bio: 'UI/UX designer creating beautiful experiences', level: 'Gold Contributor' },
+    { id: 4, username: 'crypto_carol', displayName: 'Carol Crypto', avatar: '/placeholder.svg', followers: 567, bio: 'Blockchain enthusiast and DeFi researcher', level: 'Bronze Contributor' },
+    { id: 5, username: 'tech_tom', displayName: 'Tom Tech', avatar: '/placeholder.svg', followers: 789, bio: 'Tech blogger and startup founder', level: 'Silver Contributor' },
+    { id: 6, username: 'art_anna', displayName: 'Anna Artist', avatar: '/placeholder.svg', followers: 432, bio: 'Digital artist exploring NFT creation', level: 'Bronze Contributor' },
   ];
 
+  // Seeded trending posts for early platform
+  const seededTrendingPosts: TrendingPost[] = [
+    {
+      id: 999,
+      author: 'team4_lead',
+      content: 'Welcome to ConnectUS! 🎉 This is the future of decentralized social networking. Built on the Internet Computer Protocol (ICP), we\'re creating a truly decentralized platform where users own their data and earn rewards for their contributions. #welcome #ICP #crypto #firstpost',
+      timestamp: Date.now() - 3600000, // 1 hour ago
+      likes: 156,
+      rewards: 89,
+      hashtags: ['#welcome', '#ICP', '#crypto', '#firstpost'],
+      category: 'tech',
+      mediaUrl: ''
+    },
+    {
+      id: 998,
+      author: 'alice_dev',
+      content: 'Just deployed our first smart contract on ICP! The development experience is incredible. Motoko is such a powerful language for blockchain development. Can\'t wait to see what we build next! #ICP #Motoko #Web3 #development',
+      timestamp: Date.now() - 7200000, // 2 hours ago
+      likes: 89,
+      rewards: 45,
+      hashtags: ['#ICP', '#Motoko', '#Web3', '#development'],
+      category: 'tech',
+      mediaUrl: ''
+    },
+    {
+      id: 997,
+      author: 'bob_designer',
+      content: 'Designing for Web3 is a whole new challenge! The user experience needs to be intuitive while explaining complex blockchain concepts. Here\'s what I\'ve learned about creating accessible decentralized interfaces. #UX #UI #Web3 #design',
+      timestamp: Date.now() - 10800000, // 3 hours ago
+      likes: 67,
+      rewards: 34,
+      hashtags: ['#UX', '#UI', '#Web3', '#design'],
+      category: 'art',
+      mediaUrl: ''
+    },
+    {
+      id: 996,
+      author: 'crypto_carol',
+      content: 'The future of social media is here! No more centralized control, no more data mining, no more censorship. ConnectUS gives power back to the users. This is what Web3 is all about! #crypto #Web3 #decentralized #social',
+      timestamp: Date.now() - 14400000, // 4 hours ago
+      likes: 123,
+      rewards: 67,
+      hashtags: ['#crypto', '#Web3', '#decentralized', '#social'],
+      category: 'tech',
+      mediaUrl: ''
+    },
+    {
+      id: 995,
+      author: 'tech_tom',
+      content: 'As a startup founder, I\'m excited about the possibilities that ICP offers. The ability to build truly decentralized applications without the traditional blockchain limitations is game-changing. #startup #innovation #ICP #tech',
+      timestamp: Date.now() - 18000000, // 5 hours ago
+      likes: 78,
+      rewards: 41,
+      hashtags: ['#startup', '#innovation', '#ICP', '#tech'],
+      category: 'business',
+      mediaUrl: ''
+    }
+  ];
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const canisterPosts = await team4Social.getPosts();
+      const mapped = (canisterPosts as any[]).map((post: any) => ({
+        id: Number(post.id),
+        author: post.author.toText ? post.author.toText() : String(post.author),
+        content: post.content,
+        timestamp: Number(post.timestamp),
+        likes: Number(post.likes),
+        rewards: Number(post.rewards),
+        hashtags: extractHashtags(post.content),
+        category: determineCategory(post.content),
+        mediaUrl: post.mediaUrl,
+      }));
+      
+      // Sort by engagement (likes + rewards)
+      const sorted = mapped.sort((a, b) => (b.likes + b.rewards) - (a.likes + a.rewards));
+      
+      // Combine seeded posts with real posts, prioritizing real posts
+      const combinedPosts = [...sorted, ...seededTrendingPosts];
+      setPosts(combinedPosts);
+      
+      // Set trending hashtags
+      const allHashtags = combinedPosts.flatMap(post => post.hashtags);
+      const hashtagCounts = allHashtags.reduce((acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const trending = Object.entries(hashtagCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 10)
+        .map(([tag]) => tag);
+      
+      setTrendingHashtags(trending.length > 0 ? trending : seededTrendingHashtags.slice(0, 10));
+      setSuggestedUsers(seededSuggestedUsers);
+      
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Failed to load explore content. Please try again.');
+      
+      // Fallback to seeded content
+      setPosts(seededTrendingPosts);
+      setTrendingHashtags(seededTrendingHashtags.slice(0, 10));
+      setSuggestedUsers(seededSuggestedUsers);
+      
+      toast({
+        title: "Warning",
+        description: "Using demo content while we load your data.",
+        variant: "default"
+      });
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      try {
-        const canisterPosts = await team4Social.getPosts();
-        const mapped = canisterPosts.map((post: any) => ({
-          id: Number(post.id),
-          author: post.author.toText ? post.author.toText() : String(post.author),
-          content: post.content,
-          timestamp: Number(post.timestamp),
-          likes: Number(post.likes),
-          rewards: Number(post.rewards),
-          hashtags: extractHashtags(post.content),
-          category: determineCategory(post.content),
-          mediaUrl: post.mediaUrl,
-        }));
-        
-        // Sort by engagement (likes + rewards)
-        const sorted = mapped.sort((a, b) => (b.likes + b.rewards) - (a.likes + a.rewards));
-        setPosts(sorted);
-        
-        // Set trending hashtags
-        const allHashtags = sorted.flatMap(post => post.hashtags);
-        const hashtagCounts = allHashtags.reduce((acc, tag) => {
-          acc[tag] = (acc[tag] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-        
-        const trending = Object.entries(hashtagCounts)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 10)
-          .map(([tag]) => tag);
-        
-        setTrendingHashtags(trending.length > 0 ? trending : mockTrendingHashtags.slice(0, 10));
-        setSuggestedUsers(mockSuggestedUsers);
-        
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load trending content.",
-          variant: "destructive"
-        });
-      }
-      setLoading(false);
-    };
     fetchPosts();
   }, []);
 
@@ -248,6 +326,41 @@ const Explore = () => {
     return date.toLocaleDateString();
   };
 
+  const getUserLevelIcon = (level: string) => {
+    switch (level) {
+      case 'Gold Contributor': return Crown;
+      case 'Silver Contributor': return Star;
+      default: return TrendingUp;
+    }
+  };
+
+  const getUserLevelColor = (level: string) => {
+    switch (level) {
+      case 'Gold Contributor': return 'text-yellow-500';
+      case 'Silver Contributor': return 'text-gray-400';
+      default: return 'text-orange-600';
+    }
+  };
+
+  if (error && posts.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto text-center py-12">
+            <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Could not load explore content</h2>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button onClick={fetchPosts} className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -333,34 +446,40 @@ const Explore = () => {
               </CardContent>
             </Card>
 
-            {/* Suggested Users */}
+            {/* Top Contributors */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Suggested Users
+                  Top Contributors
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {suggestedUsers.map((user) => (
-                    <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={user.avatar} />
-                        <AvatarFallback className="text-xs">
-                          {user.displayName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{user.displayName}</p>
-                        <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                        <p className="text-xs text-muted-foreground">{user.followers} followers</p>
+                  {suggestedUsers.map((user) => {
+                    const LevelIcon = getUserLevelIcon(user.level);
+                    return (
+                      <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={user.avatar} />
+                          <AvatarFallback className="text-xs">
+                            {user.displayName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <p className="font-medium text-sm truncate">{user.displayName}</p>
+                            <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+                          <p className="text-xs text-muted-foreground">{user.followers} followers</p>
+                        </div>
+                        <Button size="sm" variant="outline">
+                          Follow
+                        </Button>
                       </div>
-                      <Button size="sm" variant="outline">
-                        Follow
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -391,6 +510,16 @@ const Explore = () => {
                 </Badge>
               </div>
             </div>
+
+            {/* Error Alert */}
+            {error && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {error} Showing demo content to help you explore the platform.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Content */}
             {loading ? (
@@ -445,7 +574,18 @@ const Explore = () => {
             ) : (
               <div className="space-y-6">
                 {filteredPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
+                  <PostCard
+                    key={post.id}
+                    id={post.id}
+                    author={post.author}
+                    content={post.content}
+                    timestamp={post.timestamp}
+                    likes={post.likes}
+                    rewards={post.rewards}
+                    mediaUrl={post.mediaUrl}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                  />
                 ))}
               </div>
             )}
