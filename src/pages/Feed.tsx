@@ -19,7 +19,13 @@ import {
   Plus,
   Activity,
   Zap,
-  User
+  User,
+  Star,
+  Hash,
+  BookOpen,
+  Flame,
+  Tag,
+  ChevronDown
 } from 'lucide-react';
 
 interface Post {
@@ -32,23 +38,57 @@ interface Post {
   mediaUrl: string;
 }
 
-type FeedFilter = 'newest' | 'trending' | 'following';
+type FeedFilter = 'foryou' | 'newest' | 'trending' | 'topics';
+
+const SUGGESTED_POSTS: Post[] = [
+  {
+    id: 1001,
+    author: 'explore_bot',
+    content: 'Check out the trending #Web3 projects and join the conversation! 🚀',
+    timestamp: Date.now() - 1000 * 60 * 60,
+    likes: 42,
+    rewards: 21,
+    mediaUrl: ''
+  },
+  {
+    id: 1002,
+    author: 'community_leader',
+    content: 'Our top contributor this week is @alice_dev! Congrats! #Community',
+    timestamp: Date.now() - 1000 * 60 * 120,
+    likes: 33,
+    rewards: 18,
+    mediaUrl: ''
+  },
+  {
+    id: 1003,
+    author: 'trending_now',
+    content: 'Did you know? You can earn daily CU rewards for posting and engaging. #Rewards',
+    timestamp: Date.now() - 1000 * 60 * 180,
+    likes: 27,
+    rewards: 15,
+    mediaUrl: ''
+  }
+];
 
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [networkStats, setNetworkStats] = useState({
-    totalPosts: 0,
-    activeUsers: 0,
-    cuDistributed: 0
+  const [communityStats, setCommunityStats] = useState({
+    postsToday: 0,
+    activeThisWeek: 0,
+    topContributor: 'alice_dev',
+    topHashtag: '#Web3',
+    streak: 5,
+    cuEarnedToday: 0
   });
-  const [currentFilter, setCurrentFilter] = useState<FeedFilter>('newest');
+  const [currentFilter, setCurrentFilter] = useState<FeedFilter>('foryou');
   const { toast } = useToast();
   const [openComments, setOpenComments] = useState<number | null>(null);
   const [comments, setComments] = useState<Record<number, any[]>>({});
   const [commentInput, setCommentInput] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
+  const [topicFilter, setTopicFilter] = useState<string>('all');
 
   // Fetch posts from the canister
   const fetchPosts = async () => {
@@ -66,9 +106,8 @@ const Feed = () => {
         rewards: Number(post.rewards),
         mediaUrl: post.mediaUrl,
       }));
-      
       // Sort posts based on current filter
-      let sortedPosts = mapped.reverse();
+      let sortedPosts = mapped;
       switch (currentFilter) {
         case 'trending':
           sortedPosts = sortedPosts.sort((a, b) => (b.likes + b.rewards) - (a.likes + a.rewards));
@@ -76,29 +115,37 @@ const Feed = () => {
         case 'newest':
           sortedPosts = sortedPosts.sort((a, b) => b.timestamp - a.timestamp);
           break;
-        case 'following':
-          // For now, just show newest posts (following functionality would require user authentication)
-          sortedPosts = sortedPosts.sort((a, b) => b.timestamp - a.timestamp);
+        case 'foryou':
+          sortedPosts = sortedPosts.sort((a, b) => (b.likes + b.rewards * 2) - (a.likes + a.rewards * 2));
+          break;
+        case 'topics':
+          sortedPosts = topicFilter === 'all' ? sortedPosts : sortedPosts.filter(p => p.content.toLowerCase().includes(topicFilter.toLowerCase()));
           break;
       }
-      
       setPosts(sortedPosts);
-      
-      // Calculate live network stats from blockchain data
+      // Calculate community stats
       setTimeout(() => {
-        const uniqueUsers = new Set(sortedPosts.map(p => p.author));
-        const totalRewards = sortedPosts.reduce((sum, post) => sum + post.rewards, 0);
-        const totalLikes = sortedPosts.reduce((sum, post) => sum + post.likes, 0);
-        const totalComments = sortedPosts.reduce((sum, post) => sum + (comments[post.id]?.length || 0), 0);
-        
-        setNetworkStats({
-          totalPosts: sortedPosts.length,
-          activeUsers: uniqueUsers.size,
-          cuDistributed: totalRewards
+        const now = Date.now();
+        const postsToday = sortedPosts.filter(p => now - p.timestamp < 1000 * 60 * 60 * 24).length;
+        const activeThisWeek = new Set(sortedPosts.filter(p => now - p.timestamp < 1000 * 60 * 60 * 24 * 7).map(p => p.author)).size;
+        const topContributor = sortedPosts.reduce((acc, p) => {
+          acc[p.author] = (acc[p.author] || 0) + p.rewards;
+          return acc;
+        }, {} as Record<string, number>);
+        const topUser = Object.entries(topContributor).sort((a, b) => b[1] - a[1])[0]?.[0] || 'alice_dev';
+        const hashtags = sortedPosts.flatMap(p => (p.content.match(/#\w+/g) || []));
+        const topHashtag = hashtags.sort((a, b) => hashtags.filter(h => h === b).length - hashtags.filter(h => h === a).length)[0] || '#Web3';
+        const cuEarnedToday = sortedPosts.filter(p => now - p.timestamp < 1000 * 60 * 60 * 24).reduce((sum, p) => sum + p.rewards, 0);
+        setCommunityStats({
+          postsToday,
+          activeThisWeek,
+          topContributor: topUser,
+          topHashtag,
+          streak: 5,
+          cuEarnedToday
         });
         setStatsLoading(false);
       }, 500);
-      
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
@@ -113,7 +160,7 @@ const Feed = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [currentFilter]);
+  }, [currentFilter, topicFilter]);
 
   // Create a new post on-chain
   const handleNewPost = async (content: string, mediaUrl: string) => {
@@ -246,13 +293,9 @@ const Feed = () => {
     </div>
   );
 
-  // Stats skeleton component
+  // Community stats skeleton
   const StatsSkeleton = () => (
     <div className="space-y-3">
-      <div className="flex justify-between">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-4 w-12" />
-      </div>
       <div className="flex justify-between">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-12" />
@@ -261,8 +304,17 @@ const Feed = () => {
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-4 w-12" />
       </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-12" />
+      </div>
     </div>
   );
+
+  // Topic options
+  const TOPICS = [
+    'all', 'Web3', 'Crypto', 'DeFi', 'NFTs', 'Tech', 'Art', 'Gaming', 'Music', 'Education', 'Food', 'Travel', 'Photography', 'Design', 'Community'
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -272,35 +324,56 @@ const Feed = () => {
           {/* Left Sidebar - Token Rewards */}
           <div className="lg:col-span-1 space-y-6">
             <TokenRewards />
-            {/* Network Stats */}
+            {/* Community Stats */}
             <div className="bg-card rounded-lg p-6 border border-border">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5" />
-                Network Stats
+                Community Stats
               </h3>
               {statsLoading ? (
                 <StatsSkeleton />
               ) : (
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Posts</span>
+                    <span className="text-muted-foreground">Posts Today</span>
                     <div className="flex items-center gap-2">
                       <MessageCircle className="w-4 h-4 text-blue-500" />
-                      <span className="font-medium">{networkStats.totalPosts.toLocaleString()}</span>
+                      <span className="font-medium">{communityStats.postsToday}</span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Active Users</span>
+                    <span className="text-muted-foreground">Active This Week</span>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-green-500" />
-                      <span className="font-medium">{networkStats.activeUsers.toLocaleString()}</span>
+                      <span className="font-medium">{communityStats.activeThisWeek}</span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">CU Distributed</span>
+                    <span className="text-muted-foreground">Top Contributor</span>
                     <div className="flex items-center gap-2">
-                      <Gift className="w-4 h-4 text-purple-500" />
-                      <span className="font-medium">{networkStats.cuDistributed.toLocaleString()}</span>
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      <span className="font-medium">@{communityStats.topContributor}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Top Hashtag</span>
+                    <div className="flex items-center gap-2">
+                      <Hash className="w-4 h-4 text-purple-500" />
+                      <span className="font-medium">{communityStats.topHashtag}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Streak</span>
+                    <div className="flex items-center gap-2">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                      <span className="font-medium">{communityStats.streak} days</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">CU Earned Today</span>
+                    <div className="flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-pink-500" />
+                      <span className="font-medium">{communityStats.cuEarnedToday}</span>
                     </div>
                   </div>
                 </div>
@@ -311,8 +384,7 @@ const Feed = () => {
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6">
             <PostForm onPost={handleNewPost} />
-            
-            {/* Feed Filters - Repositioned for better clarity */}
+            {/* Feed Filters - Enhanced */}
             <div className="bg-card rounded-lg border border-border p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-foreground">Feed</h3>
@@ -320,7 +392,16 @@ const Feed = () => {
                   {posts.length} posts
                 </Badge>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={currentFilter === 'foryou' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentFilter('foryou')}
+                  className="flex items-center gap-2"
+                >
+                  <Star className="w-4 h-4" />
+                  For You
+                </Button>
                 <Button
                   variant={currentFilter === 'newest' ? 'default' : 'ghost'}
                   size="sm"
@@ -328,7 +409,7 @@ const Feed = () => {
                   className="flex items-center gap-2"
                 >
                   <Clock className="w-4 h-4" />
-                  Newest
+                  Latest
                 </Button>
                 <Button
                   variant={currentFilter === 'trending' ? 'default' : 'ghost'}
@@ -340,17 +421,28 @@ const Feed = () => {
                   Trending
                 </Button>
                 <Button
-                  variant={currentFilter === 'following' ? 'default' : 'ghost'}
+                  variant={currentFilter === 'topics' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setCurrentFilter('following')}
+                  onClick={() => setCurrentFilter('topics')}
                   className="flex items-center gap-2"
                 >
-                  <Users className="w-4 h-4" />
-                  Following
+                  <Tag className="w-4 h-4" />
+                  Topics
+                  <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
+                {currentFilter === 'topics' && (
+                  <select
+                    className="ml-2 border rounded px-2 py-1 text-sm bg-background"
+                    value={topicFilter}
+                    onChange={e => setTopicFilter(e.target.value)}
+                  >
+                    {TOPICS.map(topic => (
+                      <option key={topic} value={topic.toLowerCase()}>{topic}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
-            
             <div className="space-y-6">
               {loading ? (
                 // Loading skeletons
@@ -384,11 +476,61 @@ const Feed = () => {
                       <Badge variant="outline" className="text-sm">
                         {currentFilter === 'newest' ? 'Latest posts will appear here' :
                          currentFilter === 'trending' ? 'Popular posts will appear here' :
-                         'Posts from people you follow will appear here'}
+                         currentFilter === 'foryou' ? 'Personalized posts will appear here' :
+                         'Posts from your selected topic will appear here'}
                       </Badge>
                     </div>
                   </div>
                 </div>
+              ) : posts.length === 1 ? (
+                <>
+                  <PostCard
+                    key={posts[0].id}
+                    id={posts[0].id}
+                    author={posts[0].author}
+                    content={posts[0].content}
+                    timestamp={posts[0].timestamp}
+                    likes={posts[0].likes}
+                    rewards={posts[0].rewards}
+                    mediaUrl={posts[0].mediaUrl}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                    onOpenComments={handleOpenComments}
+                    openComments={openComments}
+                    comments={comments[posts[0].id] || []}
+                    commentInput={commentInput}
+                    setCommentInput={setCommentInput}
+                    handleAddComment={handleAddComment}
+                    commentLoading={commentLoading}
+                  />
+                  {/* Suggested content */}
+                  <div className="mt-8">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg"><BookOpen className="w-5 h-5" /> You might like</h4>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {SUGGESTED_POSTS.map(post => (
+                        <PostCard
+                          key={post.id}
+                          id={post.id}
+                          author={post.author}
+                          content={post.content}
+                          timestamp={post.timestamp}
+                          likes={post.likes}
+                          rewards={post.rewards}
+                          mediaUrl={post.mediaUrl}
+                          onLike={handleLike}
+                          onShare={handleShare}
+                          onOpenComments={handleOpenComments}
+                          openComments={openComments}
+                          comments={comments[post.id] || []}
+                          commentInput={commentInput}
+                          setCommentInput={setCommentInput}
+                          handleAddComment={handleAddComment}
+                          commentLoading={commentLoading}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
               ) : (
                 posts.map((post) => (
                   <PostCard
