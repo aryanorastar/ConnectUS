@@ -25,8 +25,6 @@ import {
 interface Post {
   id: number;
   author: string;
-  displayName?: string;
-  username?: string;
   content: string;
   timestamp: number;
   likes: number;
@@ -52,54 +50,22 @@ const Feed = () => {
   const [commentInput, setCommentInput] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
 
-  // Mock user data for display names (in production, fetch from user profiles)
-  const getUserDisplayInfo = (principalId: string) => {
-    // Mock user mapping - in production, this would come from user profiles
-    const userMap: Record<string, { displayName: string; username: string }> = {
-      'team4_lead': { displayName: 'Team4 Lead', username: 'team4_lead' },
-      'alice_dev': { displayName: 'Alice Developer', username: 'alice_dev' },
-      'bob_designer': { displayName: 'Bob Designer', username: 'bob_designer' },
-      'crypto_carol': { displayName: 'Carol Crypto', username: 'crypto_carol' },
-      'tech_tom': { displayName: 'Tom Tech', username: 'tech_tom' },
-      'art_anna': { displayName: 'Anna Artist', username: 'art_anna' }
-    };
-
-    // Check if it's a known user
-    if (userMap[principalId]) {
-      return userMap[principalId];
-    }
-
-    // For unknown users, create a friendly display name from the principal ID
-    const shortId = principalId.length > 8 ? principalId.slice(0, 8) + '...' : principalId;
-    return {
-      displayName: `User ${shortId}`,
-      username: principalId
-    };
-  };
-
   // Fetch posts from the canister
   const fetchPosts = async () => {
     setLoading(true);
     setStatsLoading(true);
     try {
       const canisterPosts = await team4Social.getPosts();
-      // Map backend posts to frontend format
-      const mapped = (canisterPosts as any[]).map((post: any) => {
-        const principalId = post.author.toText ? post.author.toText() : String(post.author);
-        const userInfo = getUserDisplayInfo(principalId);
-        
-        return {
-          id: Number(post.id),
-          author: principalId,
-          displayName: userInfo.displayName,
-          username: userInfo.username,
-          content: post.content,
-          timestamp: Number(post.timestamp),
-          likes: Number(post.likes),
-          rewards: Number(post.rewards),
-          mediaUrl: post.mediaUrl,
-        };
-      });
+      // Map backend posts to frontend format - keep it simple like Explore page
+      const mapped = (canisterPosts as any[]).map((post: any) => ({
+        id: Number(post.id),
+        author: post.author.toText ? post.author.toText() : String(post.author),
+        content: post.content,
+        timestamp: Number(post.timestamp),
+        likes: Number(post.likes),
+        rewards: Number(post.rewards),
+        mediaUrl: post.mediaUrl,
+      }));
       
       // Sort posts based on current filter
       let sortedPosts = mapped.reverse();
@@ -426,7 +392,7 @@ const Feed = () => {
                   <PostCard
                     key={post.id}
                     id={post.id}
-                    author={post.displayName || post.author}
+                    author={post.author}
                     content={post.content}
                     timestamp={post.timestamp}
                     likes={post.likes}

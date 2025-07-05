@@ -170,21 +170,8 @@ const PostCard = ({
   const mentions = extractMentions(content);
   const links = extractLinks(content);
 
-  // Get display name and username from author
-  const getAuthorInfo = (author: string) => {
-    // Check if author contains a username (e.g., "Display Name @username")
-    const usernameMatch = author.match(/@(\w+)$/);
-    if (usernameMatch) {
-      const displayName = author.replace(/@\w+$/, '').trim();
-      const username = usernameMatch[1];
-      return { displayName, username };
-    }
-    
-    // If no username found, use the author as display name
-    return { displayName: author, username: author };
-  };
-
-  const { displayName, username } = getAuthorInfo(author);
+  // Simple author display - just use the author string as provided
+  const displayName = author;
 
   return (
     <Card className="hover:shadow-lg transition-all duration-200 border-border/50">
@@ -210,12 +197,6 @@ const PostCard = ({
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 {formatTimestamp(timestamp)}
-                {username !== displayName && (
-                  <>
-                    <span>•</span>
-                    <span className="text-muted-foreground">@{username}</span>
-                  </>
-                )}
               </div>
             </div>
           </div>
