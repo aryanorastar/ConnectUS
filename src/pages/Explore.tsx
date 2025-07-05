@@ -44,9 +44,17 @@ import {
   RefreshCw,
   AlertCircle,
   Plus,
-  Crown
+  Crown,
+  HelpCircle,
+  Info
 } from 'lucide-react';
 import PostCard from '@/components/PostCard';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface TrendingPost {
   id: number;
@@ -362,237 +370,269 @@ const Explore = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Categories & Search */}
-          <div className="space-y-6">
-            {/* Search */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5" />
-                  Discover
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder="Search posts, users, hashtags..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Filter by category:</span>
-                </div>
-                
-                <div className="space-y-2">
-                  <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCategory('all')}
-                    className="w-full justify-start"
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    All Categories
-                  </Button>
+    <TooltipProvider>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Left Sidebar - Categories & Search */}
+            <div className="space-y-6">
+              {/* Search */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Search className="w-5 h-5" />
+                    Discover
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search posts, users, hashtags..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                   
-                  {categories.map((category) => (
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Filter by category:</span>
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Button
-                      key={category.id}
-                      variant={selectedCategory === category.id ? 'default' : 'outline'}
+                      variant={selectedCategory === 'all' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setSelectedCategory(category.id)}
+                      onClick={() => setSelectedCategory('all')}
                       className="w-full justify-start"
                     >
-                      <category.icon className="w-4 h-4 mr-2" />
-                      {category.name}
-                      <Badge variant="secondary" className="ml-auto text-xs">
-                        {category.postCount}
-                      </Badge>
+                      <Globe className="w-4 h-4 mr-2" />
+                      All Categories
                     </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Trending Hashtags */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Trending Hashtags
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {trendingHashtags.map((hashtag, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() => setSearchQuery(hashtag)}
-                    >
-                      {hashtag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Contributors */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Top Contributors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {suggestedUsers.map((user) => {
-                    const LevelIcon = getUserLevelIcon(user.level);
-                    return (
-                      <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={user.avatar} />
-                          <AvatarFallback className="text-xs">
-                            {user.displayName[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1">
-                            <p className="font-medium text-sm truncate">{user.displayName}</p>
-                            <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                          <p className="text-xs text-muted-foreground">{user.followers} followers</p>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          Follow
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content - Trending Posts */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                  <Sparkles className="w-8 h-8 text-primary" />
-                  Explore
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Discover trending content and connect with creators
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" />
-                  {filteredPosts.length} posts
-                </Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Zap className="w-3 h-3" />
-                  Live
-                </Badge>
-              </div>
-            </div>
-
-            {/* Error Alert */}
-            {error && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {error} Showing demo content to help you explore the platform.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Content */}
-            {loading ? (
-              <div className="space-y-6">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-muted rounded-full animate-pulse" />
-                        <div className="flex-1 space-y-3">
-                          <div className="h-4 bg-muted rounded animate-pulse w-1/3" />
-                          <div className="space-y-2">
-                            <div className="h-4 bg-muted rounded animate-pulse" />
-                            <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-                          </div>
-                          <div className="flex gap-2">
-                            <div className="h-6 bg-muted rounded animate-pulse w-16" />
-                            <div className="h-6 bg-muted rounded animate-pulse w-20" />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : filteredPosts.length === 0 ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-12">
-                    <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No posts found</h3>
-                    <p className="text-muted-foreground mb-4">
-                      {searchQuery ? `No posts match "${searchQuery}"` : 'No posts in this category yet'}
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setSearchQuery('')}
+                    
+                    {categories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.id)}
+                        className="w-full justify-start"
                       >
-                        Clear Search
+                        <category.icon className="w-4 h-4 mr-2" />
+                        {category.name}
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          {category.postCount}
+                        </Badge>
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setSelectedCategory('all')}
-                      >
-                        View All
-                      </Button>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="space-y-6">
-                {filteredPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    id={post.id}
-                    author={post.author}
-                    content={post.content}
-                    timestamp={post.timestamp}
-                    likes={post.likes}
-                    rewards={post.rewards}
-                    mediaUrl={post.mediaUrl}
-                    onLike={handleLike}
-                    onShare={handleShare}
-                  />
-                ))}
+
+              {/* Trending Hashtags */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Trending Hashtags
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {trendingHashtags.map((hashtag, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => setSearchQuery(hashtag)}
+                      >
+                        {hashtag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Top Contributors */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Top Contributors
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <div className="space-y-2">
+                          <p className="font-medium">Contributor Levels</p>
+                          <div className="text-xs space-y-1">
+                            <p><strong>Gold:</strong> 1000+ CU earned, elite status</p>
+                            <p><strong>Silver:</strong> 500-1000 CU earned, active member</p>
+                            <p><strong>Bronze:</strong> 0-500 CU earned, new contributor</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Earn CU tokens by creating quality content and engaging with the community.</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {suggestedUsers.map((user) => {
+                      const LevelIcon = getUserLevelIcon(user.level);
+                      return (
+                        <Tooltip key={user.id}>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors cursor-help">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback className="text-xs">
+                                  {user.displayName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <p className="font-medium text-sm truncate">{user.displayName}</p>
+                                  <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
+                                </div>
+                                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+                                <p className="text-xs text-muted-foreground">{user.followers} followers</p>
+                              </div>
+                              <Button size="sm" variant="outline">
+                                Follow
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <div className="space-y-2">
+                              <p className="font-medium">{user.displayName}</p>
+                              <p className="text-sm text-muted-foreground">{user.bio}</p>
+                              <div className="flex items-center gap-1">
+                                <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
+                                <span className="text-xs">{user.level}</span>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Main Content - Trending Posts */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold flex items-center gap-2">
+                    <Sparkles className="w-8 h-8 text-primary" />
+                    Explore
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    Discover trending content and connect with creators
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Eye className="w-3 h-3" />
+                    {filteredPosts.length} posts
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    Live
+                  </Badge>
+                </div>
               </div>
-            )}
+
+              {/* Error Alert */}
+              {error && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {error} Showing demo content to help you explore the platform.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Content */}
+              {loading ? (
+                <div className="space-y-6">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-muted rounded-full animate-pulse" />
+                          <div className="flex-1 space-y-3">
+                            <div className="h-4 bg-muted rounded animate-pulse w-1/3" />
+                            <div className="space-y-2">
+                              <div className="h-4 bg-muted rounded animate-pulse" />
+                              <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="h-6 bg-muted rounded animate-pulse w-16" />
+                              <div className="h-6 bg-muted rounded animate-pulse w-20" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                      <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No posts found</h3>
+                      <p className="text-muted-foreground mb-4">
+                        {searchQuery ? `No posts match "${searchQuery}"` : 'No posts in this category yet'}
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setSearchQuery('')}
+                        >
+                          Clear Search
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setSelectedCategory('all')}
+                        >
+                          View All
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-6">
+                  {filteredPosts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      id={post.id}
+                      author={post.author}
+                      content={post.content}
+                      timestamp={post.timestamp}
+                      likes={post.likes}
+                      rewards={post.rewards}
+                      mediaUrl={post.mediaUrl}
+                      onLike={handleLike}
+                      onShare={handleShare}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 

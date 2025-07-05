@@ -84,10 +84,12 @@ const Feed = () => {
       
       setPosts(sortedPosts);
       
-      // Calculate network stats with a slight delay to show loading state
+      // Calculate live network stats from blockchain data
       setTimeout(() => {
         const uniqueUsers = new Set(sortedPosts.map(p => p.author));
         const totalRewards = sortedPosts.reduce((sum, post) => sum + post.rewards, 0);
+        const totalLikes = sortedPosts.reduce((sum, post) => sum + post.likes, 0);
+        const totalComments = sortedPosts.reduce((sum, post) => sum + (comments[post.id]?.length || 0), 0);
         
         setNetworkStats({
           totalPosts: sortedPosts.length,
