@@ -20,7 +20,9 @@ import {
   HelpCircle,
   BookOpen,
   Users,
-  TrendingUp
+  TrendingUp,
+  X,
+  ChevronRight
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -66,9 +68,28 @@ export const Header = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { toast } = useToast();
 
+  // Mock notification count - in real app this would come from backend
+  const notificationCount = 3;
+
   const isActive = (path: string) => location.pathname === path;
+
+  // Generate dynamic breadcrumbs based on current location
+  const getDynamicBreadcrumbs = () => {
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const breadcrumbMap: { [key: string]: string } = {
+      'feed': 'Feed',
+      'explore': 'Explore',
+      'profile': 'Profile',
+      'rewards': 'Rewards'
+    };
+    
+    return pathSegments.map(segment => breadcrumbMap[segment] || segment);
+  };
+
+  const currentBreadcrumbs = breadcrumbs.length > 0 ? breadcrumbs : getDynamicBreadcrumbs();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -131,6 +152,7 @@ export const Header = ({
     if (searchValue.trim()) {
       navigate(`/explore?search=${encodeURIComponent(searchValue.trim())}`);
       setSearchValue('');
+      setIsSearchFocused(false);
     }
   };
 
@@ -155,7 +177,7 @@ export const Header = ({
 
           {/* Navigation */}
           {showNav && isAuthenticated && (
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-1">
               {navigationItems.map((item) => (
                 <Link 
                   key={item.path}
@@ -174,24 +196,37 @@ export const Header = ({
             </nav>
           )}
 
-          {/* Search Bar */}
+          {/* Enhanced Search Bar */}
           {showSearch && isAuthenticated && (
-            <form onSubmit={handleSearch} className="hidden md:flex items-center ml-6 w-64">
-              <input
-                type="text"
-                placeholder="Search ConnectUS..."
-                className="w-full px-3 py-2 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                value={searchValue}
-                onChange={e => setSearchValue(e.target.value)}
-              />
-              <Button type="submit" variant="ghost" size="icon" className="ml-2">
-                <SearchIcon className="w-5 h-5" />
-              </Button>
+            <form onSubmit={handleSearch} className="hidden md:flex items-center ml-6 transition-all duration-300">
+              <div className={`relative flex items-center ${isSearchFocused ? 'w-80' : 'w-64'}`}>
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search ConnectUS..."
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                  value={searchValue}
+                  onChange={e => setSearchValue(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                />
+                {searchValue && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 h-6 w-6"
+                    onClick={() => setSearchValue('')}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
             </form>
           )}
 
           {/* Desktop Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             {showQuickPost && isAuthenticated && (
               <Button
                 className="btn-accent hidden md:inline-flex"
@@ -206,12 +241,16 @@ export const Header = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative"
-                onClick={() => toast({ title: 'Notifications', description: 'No new notifications' })}
+                className="relative hidden md:inline-flex"
+                onClick={() => toast({ title: 'Notifications', description: `You have ${notificationCount} new notifications` })}
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full"></span>
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent rounded-full text-xs font-bold text-white flex items-center justify-center">
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </span>
+                )}
               </Button>
             )}
             {showUserMenu && isAuthenticated ? (
@@ -274,9 +313,12 @@ export const Header = ({
                   <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0">
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
+              <SheetContent side="left" className="w-80 p-0">
+                <SheetHeader className="px-4 py-6 border-b">
+                  <SheetTitle className="text-left">ConnectUS Menu</SheetTitle>
+                  <SheetDescription className="text-left">
+                    Navigate and manage your account
+                  </SheetDescription>
                 </SheetHeader>
                 <div className="p-4 space-y-4">
                   {showNav && isAuthenticated && (
@@ -285,7 +327,7 @@ export const Header = ({
                         <Link
                           key={item.path}
                           to={item.path}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                          className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                             isActive(item.path)
                               ? 'bg-primary/10 text-primary font-semibold shadow-sm'
                               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -300,45 +342,52 @@ export const Header = ({
                     </nav>
                   )}
                   {showSearch && isAuthenticated && (
-                    <form onSubmit={handleSearch} className="flex items-center mt-2">
-                      <input
-                        type="text"
-                        placeholder="Search ConnectUS..."
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        value={searchValue}
-                        onChange={e => setSearchValue(e.target.value)}
-                      />
-                      <Button type="submit" variant="ghost" size="icon" className="ml-2">
-                        <SearchIcon className="w-5 h-5" />
-                      </Button>
+                    <form onSubmit={handleSearch} className="flex items-center mt-4">
+                      <div className="relative w-full">
+                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <input
+                          type="text"
+                          placeholder="Search ConnectUS..."
+                          className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          value={searchValue}
+                          onChange={e => setSearchValue(e.target.value)}
+                        />
+                      </div>
                     </form>
                   )}
                   {showQuickPost && isAuthenticated && (
                     <Button
-                      className="btn-accent w-full mt-2"
+                      className="btn-accent w-full mt-4"
                       onClick={() => {
                         navigate('/feed#new-post');
                         setIsMobileMenuOpen(false);
                       }}
                     >
-                      <Plus className="w-4 h-4 mr-1" />
+                      <Plus className="w-4 h-4 mr-2" />
                       Create Post
                     </Button>
                   )}
                   {showNotifications && isAuthenticated && (
                     <Button
                       variant="ghost"
-                      className="w-full mt-2"
-                      onClick={() => toast({ title: 'Notifications', description: 'No new notifications' })}
+                      className="w-full mt-2 flex items-center justify-between"
+                      onClick={() => toast({ title: 'Notifications', description: `You have ${notificationCount} new notifications` })}
                     >
-                      <Bell className="w-4 h-4 mr-2" />
-                      Notifications
+                      <div className="flex items-center">
+                        <Bell className="w-4 h-4 mr-2" />
+                        Notifications
+                      </div>
+                      {notificationCount > 0 && (
+                        <span className="w-5 h-5 bg-accent rounded-full text-xs font-bold text-white flex items-center justify-center">
+                          {notificationCount > 9 ? '9+' : notificationCount}
+                        </span>
+                      )}
                     </Button>
                   )}
                   {showUserMenu && isAuthenticated && (
                     <div className="pt-4 border-t">
                       <div className="flex items-center space-x-3 mb-4">
-                        <Avatar className="w-10 h-10">
+                        <Avatar className="w-12 h-12">
                           <AvatarFallback className="bg-gradient-to-tr from-primary to-secondary text-white">
                             {identity?.getPrincipal().toText().slice(0, 2).toUpperCase()}
                           </AvatarFallback>
@@ -377,7 +426,7 @@ export const Header = ({
                   )}
                   {!isAuthenticated && (
                     <Button 
-                      className="btn-gradient w-full mt-2"
+                      className="btn-gradient w-full mt-4"
                       onClick={() => {
                         navigate('/');
                         setIsMobileMenuOpen(false);
@@ -394,14 +443,19 @@ export const Header = ({
         </div>
       </header>
 
-      {/* Breadcrumbs/Page Indicator */}
-      {showBreadcrumbs && breadcrumbs.length > 0 && (
+      {/* Enhanced Breadcrumbs/Page Indicator */}
+      {showBreadcrumbs && currentBreadcrumbs.length > 0 && (
         <div className="w-full bg-muted/40 border-b border-border">
-          <div className="container mx-auto px-4 py-2 flex items-center space-x-2 text-sm text-muted-foreground">
-            {breadcrumbs.map((crumb, idx) => (
+          <div className="container mx-auto px-4 py-3 flex items-center space-x-2 text-sm">
+            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              Home
+            </Link>
+            {currentBreadcrumbs.map((crumb, idx) => (
               <span key={idx} className="flex items-center">
-                {idx > 0 && <span className="mx-2">/</span>}
-                <span className={idx === breadcrumbs.length - 1 ? 'font-semibold text-foreground' : ''}>{crumb}</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground mx-1" />
+                <span className={idx === currentBreadcrumbs.length - 1 ? 'font-semibold text-foreground' : 'text-muted-foreground'}>
+                  {crumb}
+                </span>
               </span>
             ))}
           </div>
