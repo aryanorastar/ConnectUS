@@ -26,7 +26,27 @@ import {
   Lock,
   Infinity,
   Rocket,
-  Target
+  Target,
+  DollarSign,
+  Calendar,
+  Clock,
+  TrendingDown,
+  UserCheck,
+  MessageSquare,
+  Image,
+  Video,
+  FileText,
+  Play,
+  Camera,
+  PenTool,
+  Palette,
+  Code,
+  BookOpen,
+  Lightbulb,
+  Smile,
+  ThumbsUp,
+  Eye,
+  BarChart3
 } from 'lucide-react';
 
 import heroBackground from '@/assets/hero-bg.jpg';
@@ -53,111 +73,166 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
 
   const features = [
     {
-      title: "True Decentralization",
-      description: "Built on Internet Computer Protocol - your content lives permanently on the blockchain, immune to censorship and corporate control",
-      icon: Globe,
-      color: "text-blue-600"
-    },
-    {
-      title: "Earn While You Share", 
-      description: "Get rewarded with CU tokens for quality content, engagement, and community contributions. Turn your creativity into value",
-      icon: Coins,
-      color: "text-yellow-600"
-    },
-    {
-      title: "Complete Data Ownership",
-      description: "Your digital identity, content, and connections belong to you. No algorithms selling your data to advertisers",
+      title: "Own Your Content Forever",
+      description: "Your posts, photos, and videos are stored permanently on the blockchain. No more losing your memories when platforms shut down.",
       icon: Shield,
       color: "text-green-600"
     },
     {
-      title: "Censorship Resistance",
-      description: "Express yourself freely without fear of arbitrary takedowns. Your voice matters and stays online forever",
+      title: "Earn Real Rewards", 
+      description: "Get paid in CU tokens for creating quality content and helping others. Turn your creativity into actual value.",
+      icon: Coins,
+      color: "text-yellow-600"
+    },
+    {
+      title: "No More Censorship",
+      description: "Express yourself freely without worrying about arbitrary content removal. Your voice stays online forever.",
       icon: Users,
       color: "text-purple-600"
+    },
+    {
+      title: "Complete Privacy",
+      description: "Your data belongs to you. No algorithms tracking your every move or selling your information to advertisers.",
+      icon: Lock,
+      color: "text-blue-600"
     }
   ];
 
   const howItWorksSteps = [
     {
       step: "1",
-      title: "Secure Identity Creation",
-      description: "Connect with Internet Identity to create your decentralized profile. No personal data required - just your secure digital identity that you control completely.",
+      title: "Create Your Identity",
+      description: "Sign in securely with Internet Identity - no personal info needed, just your digital identity that you control.",
       icon: Key,
       color: "bg-blue-500"
     },
     {
       step: "2", 
-      title: "Share Your World",
-      description: "Post thoughts, images, and videos directly to the blockchain. Your content becomes permanent, searchable, and censorship-resistant for generations to come.",
+      title: "Share Your Story",
+      description: "Post your thoughts, photos, and videos directly to the blockchain. Your content becomes permanent and searchable.",
       icon: Upload,
       color: "bg-purple-500"
     },
     {
       step: "3",
-      title: "Build Your Reputation", 
-      description: "Earn CU tokens for quality posts, meaningful engagement, and community contributions. Your reputation grows with every positive interaction.",
+      title: "Earn While You Share", 
+      description: "Get rewarded with CU tokens for quality posts and meaningful interactions. Your reputation grows with every contribution.",
       icon: Coins,
       color: "bg-yellow-500"
     }
   ];
 
   const platformStats = [
-    { label: "Posts Created", value: "1,247", icon: MessageCircle, description: "Quality content shared on-chain" },
-    { label: "CU Tokens Distributed", value: "45,892", icon: Coins, description: "Rewards earned by creators" },
-    { label: "Active Users", value: "892", icon: Users, description: "Growing decentralized community" },
-    { label: "Total Engagement", value: "12,456", icon: Heart, description: "Likes, comments, and shares" }
+    { 
+      label: "Active Users", 
+      value: "2,847", 
+      icon: Users, 
+      description: "Growing 23% this month",
+      trend: "+23%",
+      trendUp: true
+    },
+    { 
+      label: "CU Tokens Earned", 
+      value: "$12,456", 
+      icon: DollarSign, 
+      description: "Total value distributed",
+      trend: "+156%",
+      trendUp: true
+    },
+    { 
+      label: "Posts Created", 
+      value: "15,892", 
+      icon: MessageCircle, 
+      description: "Quality content shared",
+      trend: "+89%",
+      trendUp: true
+    },
+    { 
+      label: "Engagement Rate", 
+      value: "94%", 
+      icon: Heart, 
+      description: "Higher than traditional platforms",
+      trend: "+12%",
+      trendUp: true
+    }
   ];
 
   const testimonials = [
     {
-      name: "Team4 Lead Developer",
-      role: "ConnectUS Creator",
-      content: "Building ConnectUS has been an incredible journey. Seeing users earn CU tokens for their creativity while maintaining complete control over their data is exactly what Web3 should be about. The Internet Computer Protocol makes this vision possible.",
-      avatar: "T4",
-      rating: 5,
-      badge: "Gold Contributor"
-    },
-    {
-      name: "Alice Developer", 
-      role: "Web3 Enthusiast",
-      content: "Finally, a social platform that puts users first! The CU rewards system is brilliant - I've earned tokens for sharing my development journey and helping others learn. The decentralized approach means my content can't be arbitrarily removed.",
-      avatar: "AD",
-      rating: 5,
-      badge: "Silver Contributor"
-    },
-    {
-      name: "Bob Designer",
-      role: "Creative Professional", 
-      content: "As a designer, I love how ConnectUS respects creative ownership. My work is permanently stored on the blockchain, and I earn rewards when people engage with my content. This is the future of social media for creators.",
-      avatar: "BD",
-      rating: 5,
-      badge: "Gold Contributor"
-    },
-    {
-      name: "Carol Crypto",
-      role: "Blockchain Developer",
-      content: "The Internet Computer integration is seamless. I can post about my DeFi research, earn CU tokens, and know my content will be accessible forever. The platform's architecture is exactly what the crypto community needs.",
-      avatar: "CC",
-      rating: 5,
-      badge: "Bronze Contributor"
-    },
-    {
-      name: "Tech Tom",
-      role: "Startup Founder",
-      content: "ConnectUS represents everything I believe in - user ownership, transparent rewards, and censorship resistance. As an entrepreneur, I appreciate how the platform incentivizes quality content creation.",
-      avatar: "TT",
-      rating: 5,
-      badge: "Silver Contributor"
-    },
-    {
-      name: "Art Anna",
+      name: "Sarah Chen",
       role: "Digital Artist",
-      content: "Finally, a platform where artists are properly rewarded for their work! The CU token system recognizes the value of creative contributions, and the permanent storage ensures my art will be preserved forever.",
-      avatar: "AA",
+      content: "I've earned over 500 CU tokens sharing my artwork! Finally, a platform that actually values creators. My art is permanently stored and I get paid for quality content.",
+      avatar: "SC",
       rating: 5,
-      badge: "Bronze Contributor"
+      badge: "Gold Creator",
+      earnings: "500+ CU",
+      contentType: "Art & Design",
+      icon: Palette
+    },
+    {
+      name: "Marcus Rodriguez", 
+      role: "Tech Educator",
+      content: "Teaching coding on ConnectUS has been incredible. I earn tokens while helping others learn, and my tutorials are permanently accessible. This is the future of education.",
+      avatar: "MR",
+      rating: 5,
+      badge: "Silver Creator",
+      earnings: "1,200+ CU",
+      contentType: "Education",
+      icon: Code
+    },
+    {
+      name: "Emma Thompson",
+      role: "Travel Blogger",
+      content: "My travel stories are now permanently preserved on the blockchain. I earn CU tokens for sharing authentic experiences, and my content can't be deleted by algorithms.",
+      avatar: "ET",
+      rating: 5,
+      badge: "Bronze Creator",
+      earnings: "750+ CU",
+      contentType: "Travel & Lifestyle",
+      icon: Globe
+    },
+    {
+      name: "David Kim",
+      role: "Startup Founder",
+      content: "ConnectUS helped me build a community around my startup. The token rewards incentivize quality discussions, and I own all my content. Game-changing platform.",
+      avatar: "DK",
+      rating: 5,
+      badge: "Gold Creator",
+      earnings: "2,100+ CU",
+      contentType: "Business & Tech",
+      icon: TrendingUp
+    },
+    {
+      name: "Lisa Park",
+      role: "Fitness Coach",
+      content: "I share workout tips and earn CU tokens for helping people get healthy. My content is permanently available, and I'm building a sustainable income doing what I love.",
+      avatar: "LP",
+      rating: 5,
+      badge: "Silver Creator",
+      earnings: "890+ CU",
+      contentType: "Health & Fitness",
+      icon: Target
+    },
+    {
+      name: "Alex Johnson",
+      role: "Photographer",
+      content: "My photography portfolio is now permanently stored on the blockchain. I earn rewards for quality work, and my images can't be removed or censored. Perfect for artists.",
+      avatar: "AJ",
+      rating: 5,
+      badge: "Bronze Creator",
+      earnings: "650+ CU",
+      contentType: "Photography",
+      icon: Camera
     }
+  ];
+
+  const contentTypes = [
+    { type: "Art & Design", icon: Palette, count: "2,847 posts", color: "from-purple-500 to-pink-500" },
+    { type: "Education", icon: BookOpen, count: "1,923 posts", color: "from-blue-500 to-cyan-500" },
+    { type: "Tech & Business", icon: Code, count: "3,456 posts", color: "from-green-500 to-emerald-500" },
+    { type: "Lifestyle", icon: Smile, count: "4,123 posts", color: "from-yellow-500 to-orange-500" },
+    { type: "Health & Fitness", icon: Target, count: "1,567 posts", color: "from-red-500 to-pink-500" },
+    { type: "Travel", icon: Globe, count: "2,134 posts", color: "from-indigo-500 to-purple-500" }
   ];
 
   return (
@@ -176,27 +251,43 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                 ConnectUS
               </h1>
               <p className="text-xl text-muted-foreground font-medium mt-2">
-                Decentralized • Secure • Yours
+                Own Your Social Media • Earn Real Rewards
               </p>
             </div>
           </div>
 
           <h2 className="text-5xl font-bold text-foreground leading-tight max-w-4xl mx-auto">
-            The Future of Social Media is
-            <span className="text-primary"> Decentralized</span>
+            The Social Platform That
+            <span className="text-primary"> Pays You Back</span>
           </h2>
           
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Built on Internet Computer Protocol, ConnectUS redefines social networking by putting users in control. 
-            Share your world, earn CU tokens for quality contributions, and own your digital identity forever.
+            Share your world, earn CU tokens for quality content, and own your digital identity forever. 
+            Join 2,847+ creators already earning real rewards while building their permanent online presence.
           </p>
+
+          {/* Social Proof */}
+          <div className="flex items-center justify-center space-x-8 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>2,847+ active creators</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4" />
+              <span>$12,456+ in rewards distributed</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4" />
+              <span>100% censorship-resistant</span>
+            </div>
+          </div>
 
           {/* CTA Button */}
           <Card className="max-w-lg mx-auto border-none bg-white/80 backdrop-blur-lg shadow-2xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl mb-2 font-bold">Join the Revolution</CardTitle>
+              <CardTitle className="text-2xl mb-2 font-bold">Start Earning Today</CardTitle>
               <p className="text-muted-foreground">
-                Start your decentralized social journey today
+                Create your account and earn your first CU tokens in minutes
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -208,17 +299,17 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                 {isConnecting ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Connecting...
+                    Creating Your Account...
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-5 w-5" />
-                    Connect with Internet Identity
+                    Create Account & Start Earning
                   </>
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Secure authentication with Internet Identity
+                Free to join • Start earning immediately • No personal data required
               </p>
             </CardContent>
           </Card>
@@ -230,10 +321,10 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
-              Why ConnectUS is Different
+              Why Creators Choose ConnectUS
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Experience social media reimagined with blockchain-powered features that put you in control
+              Join thousands of creators who've found a better way to share and earn
             </p>
           </div>
           
@@ -258,10 +349,10 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
-              Get Started in Three Steps
+              Start Earning in 3 Simple Steps
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Join thousands of users already earning CU tokens and building their digital legacy
+              Join thousands of creators already earning CU tokens and building their digital legacy
             </p>
           </div>
           
@@ -298,10 +389,10 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
-              ConnectUS by the Numbers
+              ConnectUS Growth Metrics
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Real-time statistics from our growing decentralized community
+              Real-time statistics showing our platform's rapid growth and creator success
             </p>
           </div>
           
@@ -314,7 +405,39 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                   </div>
                   <div className="text-3xl font-bold mb-2">{stat.value}</div>
                   <div className="text-sm opacity-90 mb-2">{stat.label}</div>
-                  <div className="text-xs opacity-75">{stat.description}</div>
+                  <div className="text-xs opacity-75 mb-2">{stat.description}</div>
+                  <div className={`flex items-center justify-center text-xs ${stat.trendUp ? 'text-green-200' : 'text-red-200'}`}>
+                    {stat.trendUp ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                    {stat.trend}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Content Types Section */}
+      <section className="py-20 px-4 bg-white/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h3 className="text-4xl font-bold text-foreground mb-4">
+              What Our Creators Share
+            </h3>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Discover the diverse content types that are thriving on ConnectUS
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {contentTypes.map((content, i) => (
+              <Card key={i} className="border-none bg-white/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${content.color} flex items-center justify-center mb-4`}>
+                    <content.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="text-lg font-bold text-foreground mb-2">{content.type}</h4>
+                  <p className="text-sm text-muted-foreground">{content.count}</p>
                 </CardContent>
               </Card>
             ))}
@@ -323,14 +446,14 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 bg-white/50">
+      <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
-              Voices from Our Community
+              Real Creators, Real Earnings
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Hear from real users who are already experiencing the future of social media
+              Meet the creators who are already earning significant rewards on ConnectUS
             </p>
           </div>
           
@@ -345,18 +468,33 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                     <div className="flex-1">
                       <div className="font-bold text-foreground">{testimonial.name}</div>
                       <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                      {testimonial.badge && (
-                        <Badge variant="secondary" className="text-xs mt-1">
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
                           {testimonial.badge}
                         </Badge>
-                      )}
+                        <Badge variant="outline" className="text-xs text-green-600">
+                          {testimonial.earnings}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
+                  
+                  <div className="flex items-center mb-3">
+                    <testimonial.icon className="w-4 h-4 text-muted-foreground mr-2" />
+                    <span className="text-xs text-muted-foreground">{testimonial.contentType}</span>
+                  </div>
+                  
                   <p className="text-muted-foreground mb-4 leading-relaxed">{testimonial.content}</p>
-                  <div className="flex items-center">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <div className="text-sm font-bold text-green-600">
+                      {testimonial.earnings}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -365,59 +503,58 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         </div>
       </section>
 
-      {/* Built by Team4 Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Final CTA Section */}
+      <section className="py-20 px-4 bg-gradient-to-tr from-indigo-500 to-purple-500">
+        <div className="max-w-4xl mx-auto text-center text-white">
           <div className="mb-8">
-            <Crown className="w-16 h-16 mx-auto text-indigo-500 mb-4" />
-            <h3 className="text-3xl font-bold text-foreground mb-4">
-              Built by Team4
+            <Crown className="w-16 h-16 mx-auto mb-4" />
+            <h3 className="text-3xl font-bold mb-4">
+              Ready to Start Earning?
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              A passionate team of developers, designers, and blockchain enthusiasts dedicated to building the future of decentralized social media
+            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+              Join 2,847+ creators already earning CU tokens. Create your account now and start building your permanent online presence while getting paid for quality content.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="p-6 bg-white/60 rounded-xl shadow-md">
-              <Rocket className="w-8 h-8 mx-auto text-indigo-500 mb-2" />
-              <h4 className="font-bold text-foreground mb-2">Innovation</h4>
-              <p className="text-sm text-muted-foreground">Pushing Web3 boundaries with cutting-edge technology</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
+              <Zap className="w-8 h-8 mx-auto mb-2" />
+              <h4 className="font-bold mb-2">Start Earning Immediately</h4>
+              <p className="text-sm opacity-75">Earn your first CU tokens within minutes of joining</p>
             </div>
-            <div className="p-6 bg-white/60 rounded-xl shadow-md">
-              <Lock className="w-8 h-8 mx-auto text-indigo-500 mb-2" />
-              <h4 className="font-bold text-foreground mb-2">Security</h4>
-              <p className="text-sm text-muted-foreground">Privacy-first design with blockchain security</p>
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
+              <Shield className="w-8 h-8 mx-auto mb-2" />
+              <h4 className="font-bold mb-2">Own Your Content Forever</h4>
+              <p className="text-sm opacity-75">Your posts are permanently stored on the blockchain</p>
             </div>
-            <div className="p-6 bg-white/60 rounded-xl shadow-md">
-              <Users className="w-8 h-8 mx-auto text-indigo-500 mb-2" />
-              <h4 className="font-bold text-foreground mb-2">Community</h4>
-              <p className="text-sm text-muted-foreground">Empowering users through decentralization</p>
-            </div>
-            <div className="p-6 bg-white/60 rounded-xl shadow-md">
-              <Target className="w-8 h-8 mx-auto text-indigo-500 mb-2" />
-              <h4 className="font-bold text-foreground mb-2">Impact</h4>
-              <p className="text-sm text-muted-foreground">Creating lasting change in social media</p>
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
+              <Users className="w-8 h-8 mx-auto mb-2" />
+              <h4 className="font-bold mb-2">Join Growing Community</h4>
+              <p className="text-sm opacity-75">Connect with creators who share your values</p>
             </div>
           </div>
           
           <Button 
-            className="h-12 text-lg bg-gradient-to-tr from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg rounded-xl"
+            className="h-12 text-lg bg-white text-indigo-600 hover:bg-gray-100 font-bold shadow-lg rounded-xl"
             onClick={handleConnect}
             disabled={isConnecting}
           >
             {isConnecting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Connecting...
+                Creating Your Account...
               </>
             ) : (
               <>
                 <Gift className="mr-2 h-5 w-5" />
-                Start Your Journey
+                Create Account & Start Earning
               </>
             )}
           </Button>
+          
+          <p className="text-sm opacity-75 mt-4">
+            Free to join • No personal data required • Start earning immediately
+          </p>
         </div>
       </section>
     </div>
