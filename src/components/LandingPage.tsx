@@ -237,24 +237,21 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-black">
       <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-background/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-900 to-black opacity-90"></div>
         <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16">
-          <h2 className="text-5xl font-bold text-foreground leading-tight max-w-4xl mx-auto">
+          <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
             The Social Platform That
             <span className="text-primary"> Pays You Back</span>
           </h2>
-          
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
             Share your world, earn CU tokens for quality content, and own your digital identity forever. 
             Join 2,847+ creators already earning real rewards while building their permanent online presence.
           </p>
-
-          {/* Social Proof */}
-          <div className="flex items-center justify-center space-x-8 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center space-x-8 text-sm text-white/60">
             <div className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
               <span>2,847+ active creators</span>
@@ -268,18 +265,16 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               <span>100% censorship-resistant</span>
             </div>
           </div>
-
-          {/* CTA Button */}
-          <Card className="max-w-lg mx-auto border-none bg-card/90 backdrop-blur-lg shadow-2xl">
+          <Card className="max-w-lg mx-auto border-none bg-neutral-900/90 backdrop-blur-lg shadow-2xl rounded-2xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl mb-2 font-bold text-card-foreground">Start Earning Today</CardTitle>
-              <p className="text-muted-foreground">
+              <CardTitle className="text-2xl mb-2 font-bold text-white">Start Earning Today</CardTitle>
+              <p className="text-white/70">
                 Create your account and earn your first CU tokens in minutes
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button 
-                className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-bold shadow-lg rounded-xl"
+                className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl"
                 onClick={handleConnect}
                 disabled={isConnecting}
               >
@@ -295,7 +290,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                   </>
                 )}
               </Button>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-xs text-white/60 text-center">
                 Free to join • Start earning immediately • No personal data required
               </p>
             </CardContent>
@@ -307,23 +302,23 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-black mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Why Creators Choose ConnectUS
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Join thousands of creators who've found a better way to share and earn
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, i) => (
-              <Card key={i} className="text-center border-none bg-card/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="text-center border-none bg-neutral-900/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <CardContent className="p-6">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center`}>
-                    <feature.icon className={`w-8 h-8 ${feature.color}`} />
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-primary/30 to-secondary/30 flex items-center justify-center shadow-glow`}>
+                    <feature.icon className={`w-8 h-8 ${feature.color} text-white`} />
                   </div>
-                  <h4 className="text-xl font-bold text-card-foreground mb-2">{feature.title}</h4>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <h4 className="text-xl font-bold text-white mb-2">{feature.title}</h4>
+                  <p className="text-white/70">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -332,13 +327,13 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4 bg-background/90">
+      <section className="py-20 px-4 bg-black/90">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-foreground mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Start Earning in 3 Simple Steps
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Join thousands of creators already earning CU tokens and building their digital legacy
             </p>
           </div>
@@ -346,23 +341,23 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {howItWorksSteps.map((step, i) => (
               <div key={i} className="relative">
-                <Card className="text-center border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className="text-center border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                   <CardContent className="p-8">
-                    <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center shadow-lg`}>
-                      <step.icon className="w-10 h-10 text-primary-foreground" />
+                    <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center shadow-glow`}>
+                      <step.icon className="w-10 h-10 text-white" />
                     </div>
-                    <Badge variant="outline" className="mb-4 text-sm font-bold">
+                    <Badge variant="outline" className="mb-4 text-sm font-bold text-white border-white/40 bg-black/60">
                       Step {step.step}
                     </Badge>
-                    <h4 className="text-2xl font-bold text-card-foreground mb-4">{step.title}</h4>
-                    <p className="text-muted-foreground leading-relaxed">{step.description}</p>
+                    <h4 className="text-2xl font-bold text-white mb-4">{step.title}</h4>
+                    <p className="text-white/70 leading-relaxed">{step.description}</p>
                   </CardContent>
                 </Card>
                 
                 {/* Arrow between steps */}
                 {i < howItWorksSteps.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-8 h-8 text-muted-foreground" />
+                    <ArrowRight className="w-8 h-8 text-white/40" />
                   </div>
                 )}
               </div>
@@ -375,20 +370,20 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-black mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               ConnectUS Growth Metrics
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Real-time statistics showing our platform's rapid growth and creator success
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {platformStats.map((stat, i) => (
-              <Card key={i} className="text-center border-none bg-card/90 text-card-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="text-center border-none bg-neutral-900/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <CardContent className="p-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-                    <stat.icon className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/30 flex items-center justify-center shadow-glow">
+                    <stat.icon className="w-8 h-8 text-white" />
                   </div>
                   <div className="text-3xl font-bold mb-2">{stat.value}</div>
                   <div className="text-sm opacity-90 mb-2">{stat.label}</div>
@@ -405,26 +400,26 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Content Types Section */}
-      <section className="py-20 px-4 bg-background/90">
+      <section className="py-20 px-4 bg-black/90">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-foreground mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4">
               What Our Creators Share
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Discover the diverse content types that are thriving on ConnectUS
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {contentTypes.map((content, i) => (
-              <Card key={i} className="border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${content.color} flex items-center justify-center mb-4`}>
-                    <content.icon className="w-6 h-6 text-primary-foreground" />
+                    <content.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-lg font-bold text-card-foreground mb-2">{content.type}</h4>
-                  <p className="text-sm text-muted-foreground">{content.count}</p>
+                  <h4 className="text-lg font-bold text-white mb-2">{content.type}</h4>
+                  <p className="text-sm text-white/70">{content.count}</p>
                 </CardContent>
               </Card>
             ))}
@@ -436,25 +431,25 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4 bg-gradient-to-tr from-primary/80 to-secondary/80">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-card-foreground mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4">
               Real Creators, Real Earnings
             </h3>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Meet the creators who are already earning significant rewards on ConnectUS
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, i) => (
-              <Card key={i} className="border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold mr-4">
+                    <div className="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold mr-4">
                       {testimonial.avatar}
                     </div>
                     <div className="flex-1">
-                      <div className="font-bold text-card-foreground">{testimonial.name}</div>
-                      <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                      <div className="font-bold text-white">{testimonial.name}</div>
+                      <div className="text-sm text-white/70">{testimonial.role}</div>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {testimonial.badge}
@@ -466,9 +461,9 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                     </div>
                   </div>
                   
-                  <div className="text-sm text-muted-foreground mb-2">{testimonial.content}</div>
+                  <div className="text-sm text-white/70 mb-2">{testimonial.content}</div>
                   
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-white/70">
                     <testimonial.icon className="w-4 h-4" />
                     <span>{testimonial.contentType}</span>
                   </div>
@@ -480,38 +475,38 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-background/90">
-        <div className="max-w-4xl mx-auto text-center text-card-foreground">
+      <section className="py-20 px-4 bg-black/90">
+        <div className="max-w-4xl mx-auto text-center text-white">
           <div className="mb-8">
             <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
             <h3 className="text-3xl font-bold mb-4">
               Ready to Start Earning?
             </h3>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto text-muted-foreground">
+            <p className="text-xl opacity-90 max-w-2xl mx-auto text-white/70">
               Join 2,847+ creators already earning CU tokens. Create your account now and start building your permanent online presence while getting paid for quality content.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
               <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <h4 className="font-bold mb-2 text-card-foreground">Start Earning Immediately</h4>
-              <p className="text-sm opacity-75 text-muted-foreground">Earn your first CU tokens within minutes of joining</p>
+              <h4 className="font-bold mb-2 text-white">Start Earning Immediately</h4>
+              <p className="text-sm opacity-75 text-white/70">Earn your first CU tokens within minutes of joining</p>
             </div>
-            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
               <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <h4 className="font-bold mb-2 text-card-foreground">Own Your Content Forever</h4>
-              <p className="text-sm opacity-75 text-muted-foreground">Your posts are permanently stored on the blockchain</p>
+              <h4 className="font-bold mb-2 text-white">Own Your Content Forever</h4>
+              <p className="text-sm opacity-75 text-white/70">Your posts are permanently stored on the blockchain</p>
             </div>
-            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
               <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <h4 className="font-bold mb-2 text-card-foreground">Join Growing Community</h4>
-              <p className="text-sm opacity-75 text-muted-foreground">Connect with creators who share your values</p>
+              <h4 className="font-bold mb-2 text-white">Join Growing Community</h4>
+              <p className="text-sm opacity-75 text-white/70">Connect with creators who share your values</p>
             </div>
           </div>
           
           <Button 
-            className="h-12 text-lg bg-gradient-to-tr from-primary to-secondary text-primary-foreground hover:from-primary/90 hover:to-secondary/90 font-bold shadow-lg rounded-xl"
+            className="h-12 text-lg bg-gradient-to-tr from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-bold shadow-lg rounded-xl"
             onClick={handleConnect}
             disabled={isConnecting}
           >
@@ -528,7 +523,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
             )}
           </Button>
           
-          <p className="text-sm opacity-75 mt-4 text-muted-foreground">
+          <p className="text-sm opacity-75 mt-4 text-white/70">
             Free to join • No personal data required • Start earning immediately
           </p>
         </div>
@@ -536,23 +531,23 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
 
       {/* Team Section */}
       <section className="mt-24 mb-12">
-        <Card className="max-w-3xl mx-auto bg-card/80">
+        <Card className="max-w-3xl mx-auto bg-neutral-900">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-foreground text-center">Meet the Team</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white text-center">Meet the Team</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-card-foreground mb-2">AG</div>
-                <div className="font-semibold text-lg text-foreground">Aryan Gupta</div>
-                <div className="text-sm text-muted-foreground">Team Lead, Fullstack & Smart Contract Engineer</div>
-                <div className="text-xs text-muted-foreground mt-1">- Platform architecture<br/>- Motoko backend<br/>- Token rewards<br/>- UI/UX direction</div>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-white mb-2">AG</div>
+                <div className="font-semibold text-lg text-white">Aryan Gupta</div>
+                <div className="text-sm text-white/70">Team Lead, Fullstack & Smart Contract Engineer</div>
+                <div className="text-xs text-white/70 mt-1">- Platform architecture<br/>- Motoko backend<br/>- Token rewards<br/>- UI/UX direction</div>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-card-foreground mb-2">AJ</div>
-                <div className="font-semibold text-lg text-foreground">Arnav Jhalani</div>
-                <div className="text-sm text-muted-foreground">Frontend Developer</div>
-                <div className="text-xs text-muted-foreground mt-1">- React UI<br/>- Page layouts<br/>- Component design<br/>- Accessibility</div>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-white mb-2">AJ</div>
+                <div className="font-semibold text-lg text-white">Arnav Jhalani</div>
+                <div className="text-sm text-white/70">Frontend Developer</div>
+                <div className="text-xs text-white/70 mt-1">- React UI<br/>- Page layouts<br/>- Component design<br/>- Accessibility</div>
               </div>
             </div>
           </CardContent>
