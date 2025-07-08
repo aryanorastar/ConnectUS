@@ -253,7 +253,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
         {/* Floating ConnectUS logo */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-10 animate-float">
+        <div className="absolute left-1/2 top-32 md:top-20 -translate-x-1/2 z-20 animate-float w-full flex justify-center pointer-events-none">
           <div className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center shadow-2xl">
             <span className="text-white text-4xl font-extrabold tracking-widest drop-shadow-glow">CU</span>
           </div>
