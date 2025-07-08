@@ -446,7 +446,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
-                  className="w-full h-14 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl border-2 border-white/30 animate-pulse focus:ring-4 focus:ring-primary/40 focus:outline-none"
+                  className="w-full h-14 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl border-2 border-white/30 focus:ring-4 focus:ring-primary/40 focus:outline-none"
                   onClick={handleConnect}
                   disabled={isConnecting}
                 >
@@ -477,6 +477,8 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         <svg className="absolute top-0 left-0 w-full h-32 z-0" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
           <path fill="#a78bfa22" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,154.7C840,149,960,171,1080,186.7C1200,203,1320,213,1380,218.7L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
         </svg>
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 z-0 bg-black/60 pointer-events-none" />
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
@@ -526,12 +528,9 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-8">
             {howItWorksSteps.map((step, i) => (
               <div key={i} className="relative flex flex-col items-center text-center z-10">
-                {/* Step Illustration */}
-                <div className="w-36 h-36 mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center">
-                  <img src={HOW_IT_WORKS_IMAGES[i]} alt={step.title} className="w-full h-full object-contain" loading="lazy" />
-                </div>
-                <div className={`w-12 h-12 mx-auto mb-4 rounded-full ${step.color} flex items-center justify-center shadow-glow border-2 border-white/20 bg-gradient-to-tr from-white/30 to-white/10`}>
-                  <step.icon className="w-7 h-7 text-white" />
+                {/* Step Icon Only (no illustration) */}
+                <div className={`w-24 h-24 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center shadow-glow border-2 border-white/20 bg-gradient-to-tr from-white/30 to-white/10`}>
+                  <step.icon className="w-12 h-12 text-white" />
                 </div>
                 <Badge variant="outline" className="mb-2 text-sm font-bold text-white border-white/40 bg-black/60">
                   Step {step.step}
@@ -692,11 +691,9 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
 
       {/* Final CTA Section */}
       <section className="relative py-24 px-4 bg-gradient-to-tr from-indigo-900 via-purple-900 to-black overflow-hidden">
-        {/* Mascot/celebration illustration */}
-        <img src={CTA_IMAGE} alt="Celebration" className="absolute right-8 bottom-0 w-64 h-64 object-contain opacity-80 z-0 pointer-events-none hidden md:block" loading="lazy" />
         <div className="max-w-4xl mx-auto text-center text-white relative z-10">
           <div className="mb-12">
-            <Crown className="w-16 h-16 mx-auto mb-4 text-primary animate-float" />
+            <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
             <h3 className="text-3xl font-bold mb-4 drop-shadow-glow">
               Ready to Start Earning?
             </h3>
@@ -706,23 +703,23 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
-              <Zap className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
+              <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
               <h4 className="font-bold mb-2 text-white">Start Earning Immediately</h4>
               <p className="text-sm opacity-75 text-white/70">Earn your first CU tokens within minutes of joining</p>
             </div>
             <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
-              <Shield className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
+              <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
               <h4 className="font-bold mb-2 text-white">Own Your Content Forever</h4>
               <p className="text-sm opacity-75 text-white/70">Your posts are permanently stored on the blockchain</p>
             </div>
             <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
-              <Users className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
+              <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
               <h4 className="font-bold mb-2 text-white">Join Growing Community</h4>
               <p className="text-sm opacity-75 text-white/70">Connect with creators who share your values</p>
             </div>
           </div>
           <Button 
-            className="h-16 px-12 text-2xl bg-gradient-to-tr from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-bold shadow-2xl rounded-2xl border-2 border-white/30 animate-pulse focus:ring-4 focus:ring-primary/40 focus:outline-none mb-4 mt-2"
+            className="h-16 px-12 text-2xl bg-gradient-to-tr from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-bold shadow-2xl rounded-2xl border-2 border-white/30 focus:ring-4 focus:ring-primary/40 focus:outline-none mb-4 mt-2"
             onClick={handleConnect}
             disabled={isConnecting}
           >
@@ -760,7 +757,6 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               <div className="flex flex-col md:flex-row items-center justify-center gap-12">
                 {/* Aryan Gupta */}
                 <div className="flex flex-col items-center bg-white/10 rounded-2xl p-6 shadow-lg w-full md:w-1/2 animate-fade-in-stagger">
-                  <img src={TEAM_AVATARS[0]} alt="Aryan Gupta" className="w-20 h-20 rounded-full border-2 border-white/30 shadow-md object-cover mb-2" loading="lazy" />
                   <div className="font-semibold text-lg text-white">Aryan Gupta</div>
                   <span className="inline-block bg-gradient-to-tr from-primary to-secondary text-white text-xs font-bold px-3 py-1 rounded-full mt-1 mb-2">Team Lead</span>
                   <div className="text-sm text-white/70 mb-2">Fullstack & Smart Contract Engineer</div>
@@ -768,7 +764,6 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                 </div>
                 {/* Arnav Jhalani */}
                 <div className="flex flex-col items-center bg-white/10 rounded-2xl p-6 shadow-lg w-full md:w-1/2 animate-fade-in-stagger">
-                  <img src={TEAM_AVATARS[1]} alt="Arnav Jhalani" className="w-20 h-20 rounded-full border-2 border-white/30 shadow-md object-cover mb-2" loading="lazy" />
                   <div className="font-semibold text-lg text-white">Arnav Jhalani</div>
                   <span className="inline-block bg-gradient-to-tr from-secondary to-primary text-white text-xs font-bold px-3 py-1 rounded-full mt-1 mb-2">Frontend Dev</span>
                   <div className="text-sm text-white/70 mb-2">Frontend Developer</div>
