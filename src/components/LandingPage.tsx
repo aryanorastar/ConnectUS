@@ -307,7 +307,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-foreground mb-4">
+            <h3 className="text-4xl font-bold text-black mb-4">
               Why Creators Choose ConnectUS
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -375,7 +375,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-foreground mb-4">
+            <h3 className="text-4xl font-bold text-black mb-4">
               ConnectUS Growth Metrics
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -532,6 +532,31 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
             Free to join • No personal data required • Start earning immediately
           </p>
         </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="mt-24 mb-12">
+        <Card className="max-w-3xl mx-auto bg-card/80">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-foreground text-center">Meet the Team</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-card-foreground mb-2">AG</div>
+                <div className="font-semibold text-lg text-foreground">Aryan Gupta</div>
+                <div className="text-sm text-muted-foreground">Team Lead, Fullstack & Smart Contract Engineer</div>
+                <div className="text-xs text-muted-foreground mt-1">- Platform architecture<br/>- Motoko backend<br/>- Token rewards<br/>- UI/UX direction</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-card-foreground mb-2">AJ</div>
+                <div className="font-semibold text-lg text-foreground">Arnav Jhalani</div>
+                <div className="text-sm text-muted-foreground">Frontend Developer</div>
+                <div className="text-xs text-muted-foreground mt-1">- React UI<br/>- Page layouts<br/>- Component design<br/>- Accessibility</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
