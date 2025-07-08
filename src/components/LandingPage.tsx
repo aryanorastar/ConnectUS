@@ -55,9 +55,86 @@ import {
 
 import heroBackground from '@/assets/hero-bg.jpg';
 
+// Add Unsplash hero image
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
+
+// Add undraw SVGs for steps
+const HOW_IT_WORKS_IMAGES = [
+  'https://undraw.co/api/illustrations/7e1c7e1c-7e1c-4e1c-8e1c-7e1c7e1c7e1c', // Identity
+  'https://undraw.co/api/illustrations/8e2c8e2c-8e2c-4e2c-9e2c-8e2c8e2c8e2c', // Share
+  'https://undraw.co/api/illustrations/9e3c9e3c-9e3c-4e3c-ae3c-9e3c9e3c9e3c', // Earn
+];
+
+// Avatars for social proof
+const AVATARS = [
+  'https://randomuser.me/api/portraits/men/32.jpg',
+  'https://randomuser.me/api/portraits/women/44.jpg',
+  'https://randomuser.me/api/portraits/men/65.jpg',
+  'https://randomuser.me/api/portraits/women/68.jpg',
+  'https://randomuser.me/api/portraits/men/12.jpg',
+  'https://randomuser.me/api/portraits/women/21.jpg',
+  'https://randomuser.me/api/portraits/men/23.jpg',
+  'https://randomuser.me/api/portraits/women/29.jpg',
+  'https://randomuser.me/api/portraits/men/41.jpg',
+  'https://randomuser.me/api/portraits/women/50.jpg',
+];
+
+// Add avatars for testimonials
+const TESTIMONIAL_AVATARS = [
+  'https://randomuser.me/api/portraits/women/65.jpg',
+  'https://randomuser.me/api/portraits/men/34.jpg',
+  'https://randomuser.me/api/portraits/women/32.jpg',
+  'https://randomuser.me/api/portraits/men/45.jpg',
+  'https://randomuser.me/api/portraits/women/21.jpg',
+  'https://randomuser.me/api/portraits/men/23.jpg',
+];
+
+// Team avatars
+const TEAM_AVATARS = [
+  'https://randomuser.me/api/portraits/men/11.jpg', // Aryan Gupta
+  'https://randomuser.me/api/portraits/men/12.jpg', // Arnav Jhalani
+];
+
 interface WalletConnectionProps {
   onConnect: () => void;
 }
+
+// Animated counter hook
+function useCountUp(target, duration = 1200) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const end = typeof target === 'string' ? parseInt(target.replace(/[^0-9]/g, '')) : target;
+    if (isNaN(end)) return;
+    const step = Math.ceil(end / (duration / 16));
+    let raf;
+    function update() {
+      start += step;
+      if (start >= end) {
+        setCount(end);
+        return;
+      }
+      setCount(start);
+      raf = requestAnimationFrame(update);
+    }
+    update();
+    return () => raf && cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return count;
+}
+
+// Add Unsplash images for content types
+const CONTENT_TYPE_IMAGES = [
+  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80', // Art & Design
+  'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=400&q=80', // Education
+  'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80', // Tech & Business
+  'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80', // Lifestyle
+  'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80', // Health & Fitness
+  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80', // Travel
+];
+
+// Fun mascot/celebration SVG for CTA
+const CTA_IMAGE = 'https://undraw.co/api/illustrations/celebration';
 
 export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
   const { login, isAuthenticated } = useAuth();
@@ -286,10 +363,35 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
     { type: "Travel", icon: Globe, count: "2,134 posts", color: "from-indigo-500 to-purple-500" }
   ];
 
+  // Typewriter effect for headline
+  const [displayedText, setDisplayedText] = useState('');
+  const fullText = 'The Social Platform That Pays You Back';
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayedText(fullText.slice(0, i + 1));
+      i++;
+      if (i === fullText.length) clearInterval(interval);
+    }, 40);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Simple carousel state for testimonials
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const visibleTestimonials = testimonials.slice(testimonialIndex, testimonialIndex + 3);
+  function nextTestimonial() {
+    setTestimonialIndex(i => (i + 1) % (testimonials.length - 2));
+  }
+  function prevTestimonial() {
+    setTestimonialIndex(i => (i - 1 + testimonials.length - 2) % (testimonials.length - 2));
+  }
+
   return (
     <div className="min-h-screen bg-black relative overflow-x-hidden">
-      {/* Animated background gradient */}
-      <div className="fixed inset-0 z-0 pointer-events-none animate-gradient-x bg-gradient-to-tr from-purple-900 via-black to-indigo-900 opacity-60 blur-2xl" />
+      {/* Animated background gradient with particles */}
+      <div className="fixed inset-0 z-0 pointer-events-none animate-gradient-x bg-gradient-to-tr from-purple-900 via-black to-indigo-900 opacity-80 blur-2xl" />
+      {/* Hero Image Overlay */}
+      <img src={HERO_IMAGE} alt="Community" className="fixed inset-0 w-full h-full object-cover object-center opacity-30 z-0 pointer-events-none" style={{mixBlendMode:'lighten'}} />
       {/* White Glow Background - now above the gradient */}
       <div className="fixed inset-0 z-10 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0 w-full h-full flex items-center justify-center">
@@ -303,70 +405,79 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
         <div className="relative flex flex-col items-center z-20">
-          {/* CU Logo - clean, no border */}
-          <div className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center shadow-2xl mb-6">
-            <span className="text-white text-4xl font-extrabold tracking-widest drop-shadow-glow">CU</span>
+          {/* CU Logo - glassmorphism effect */}
+          <div className="w-28 h-28 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl flex items-center justify-center shadow-2xl mb-8" style={{boxShadow:'0 0 60px 10px #fff4, 0 0 120px 40px #a78bfa44'}}>
+            <span className="text-white text-5xl font-extrabold tracking-widest drop-shadow-glow" style={{textShadow:'0 0 32px #fff, 0 0 64px #a78bfa'}}>
+              CU
+            </span>
           </div>
           <div className="text-center space-y-8 max-w-6xl mx-auto py-16 animate-fade-in-stagger">
-            <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
-            The Social Platform That
-            <span className="text-primary"> Pays You Back</span>
-          </h2>
+            {/* Animated Headline */}
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
+              <span className="text-primary">{displayedText}</span>
+              <span className="blinking-cursor text-primary">|</span>
+            </h2>
+            <style>{`.blinking-cursor { animation: blink 1s steps(2, start) infinite; } @keyframes blink { to { opacity: 0; } }`}</style>
             <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-            Share your world, earn CU tokens for quality content, and own your digital identity forever. 
-            Join 2,847+ creators already earning real rewards while building their permanent online presence.
-          </p>
+              Share your world, earn CU tokens for quality content, and own your digital identity forever. 
+              Join 2,847+ creators already earning real rewards while building their permanent online presence.
+            </p>
             <div className="flex items-center justify-center space-x-8 text-sm text-white/60">
-            <div className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>2,847+ active creators</span>
+              <div className="flex items-center space-x-2">
+                <Users className="w-4 h-4" />
+                <span>2,847+ active creators</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <DollarSign className="w-4 h-4" />
+                <span>$12,456+ in rewards distributed</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4" />
+                <span>100% censorship-resistant</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <DollarSign className="w-4 h-4" />
-              <span>$12,456+ in rewards distributed</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Shield className="w-4 h-4" />
-              <span>100% censorship-resistant</span>
-            </div>
-          </div>
+            {/* Glowing CTA Button */}
             <Card className="max-w-lg mx-auto border-none bg-neutral-900/90 backdrop-blur-lg shadow-2xl rounded-2xl">
-            <CardHeader className="text-center">
+              <CardHeader className="text-center">
                 <CardTitle className="text-2xl mb-2 font-bold text-white">Start Earning Today</CardTitle>
                 <p className="text-white/70">
-                Create your account and earn your first CU tokens in minutes
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                  className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl"
-                onClick={handleConnect}
-                disabled={isConnecting}
-              >
-                {isConnecting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating Your Account...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Create Account & Start Earning
-                  </>
-                )}
-              </Button>
+                  Create your account and earn your first CU tokens in minutes
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full h-14 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl border-2 border-white/30 animate-pulse focus:ring-4 focus:ring-primary/40 focus:outline-none"
+                  onClick={handleConnect}
+                  disabled={isConnecting}
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating Your Account...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Create Account & Start Earning
+                    </>
+                  )}
+                </Button>
                 <p className="text-xs text-white/60 text-center">
-                Free to join • Start earning immediately • No personal data required
-              </p>
-            </CardContent>
-          </Card>
+                  Free to join • Start earning immediately • No personal data required
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative py-24 px-4 overflow-hidden">
+        {/* SVG Wave Accent */}
+        <svg className="absolute top-0 left-0 w-full h-32 z-0" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
+          <path fill="#a78bfa22" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,154.7C840,149,960,171,1080,186.7C1200,203,1320,213,1380,218.7L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
+        </svg>
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Why Creators Choose ConnectUS
@@ -375,17 +486,21 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Join thousands of creators who've found a better way to share and earn
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
             {features.map((feature, i) => (
-              <Card key={i} className="text-center border-none bg-neutral-900/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                <CardContent className="p-6">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-primary/30 to-secondary/30 flex items-center justify-center shadow-glow`}>
-                    <feature.icon className={`w-8 h-8 ${feature.color} text-white`} />
-                  </div>
-                  <h4 className="text-xl font-bold text-white mb-2">{feature.title}</h4>
+              <Card key={i} className="text-center border-none bg-white/10 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 rounded-3xl transform hover:scale-105 group relative overflow-hidden">
+                {/* Icon with colorful glassy background */}
+                <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center shadow-glow border-2 border-white/20 bg-gradient-to-tr from-white/30 to-${feature.color.replace('text-', '')}/40 group-hover:scale-110 transition-transform duration-300`} style={{boxShadow:'0 0 32px #fff6, 0 0 64px #a78bfa33'}}>
+                  <feature.icon className={`w-10 h-10 ${feature.color} drop-shadow-glow`} />
+                </div>
+                <CardContent className="p-8">
+                  <h4 className="text-xl font-bold text-white mb-2 drop-shadow-glow">{feature.title}</h4>
                   <p className="text-white/70">{feature.description}</p>
                 </CardContent>
+                {/* Glass shine effect */}
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                  <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 rounded-3xl blur-2xl" />
+                </div>
               </Card>
             ))}
           </div>
@@ -393,8 +508,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4 bg-black/90">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative py-24 px-4 bg-black/90 overflow-hidden">
+        {/* Background Accent */}
+        <svg className="absolute -top-16 right-0 w-1/2 h-64 z-0" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
+          <ellipse cx="300" cy="100" rx="300" ry="100" fill="#6366f133" />
+        </svg>
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Start Earning in 3 Simple Steps
@@ -403,27 +522,26 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Join thousands of creators already earning CU tokens and building their digital legacy
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Timeline/Stepper */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-8">
             {howItWorksSteps.map((step, i) => (
-              <div key={i} className="relative">
-                <Card className="text-center border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                  <CardContent className="p-8">
-                    <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center shadow-glow`}>
-                      <step.icon className="w-10 h-10 text-white" />
-                    </div>
-                    <Badge variant="outline" className="mb-4 text-sm font-bold text-white border-white/40 bg-black/60">
-                      Step {step.step}
-                    </Badge>
-                    <h4 className="text-2xl font-bold text-white mb-4">{step.title}</h4>
-                    <p className="text-white/70 leading-relaxed">{step.description}</p>
-                  </CardContent>
-                </Card>
-                
-                {/* Arrow between steps */}
+              <div key={i} className="relative flex flex-col items-center text-center z-10">
+                {/* Step Illustration */}
+                <div className="w-36 h-36 mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-center">
+                  <img src={HOW_IT_WORKS_IMAGES[i]} alt={step.title} className="w-full h-full object-contain" loading="lazy" />
+                </div>
+                <div className={`w-12 h-12 mx-auto mb-4 rounded-full ${step.color} flex items-center justify-center shadow-glow border-2 border-white/20 bg-gradient-to-tr from-white/30 to-white/10`}>
+                  <step.icon className="w-7 h-7 text-white" />
+                </div>
+                <Badge variant="outline" className="mb-2 text-sm font-bold text-white border-white/40 bg-black/60">
+                  Step {step.step}
+                </Badge>
+                <h4 className="text-2xl font-bold text-white mb-2 drop-shadow-glow">{step.title}</h4>
+                <p className="text-white/70 leading-relaxed mb-2">{step.description}</p>
+                {/* Animated Arrow */}
                 {i < howItWorksSteps.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-8 h-8 text-white/40" />
+                  <div className="hidden md:block absolute top-1/2 right-[-48px] transform -translate-y-1/2 z-10 animate-float">
+                    <ArrowRight className="w-10 h-10 text-primary/60" />
                   </div>
                 )}
               </div>
@@ -432,8 +550,8 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         </div>
       </section>
 
-      {/* Platform Stats */}
-      <section className="py-20 px-4">
+      {/* Platform Stats & Social Proof */}
+      <section className="relative py-24 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
@@ -443,31 +561,48 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Real-time statistics showing our platform's rapid growth and creator success
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {platformStats.map((stat, i) => (
-              <Card key={i} className="text-center border-none bg-neutral-900/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                <CardContent className="p-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/30 flex items-center justify-center shadow-glow">
-                    <stat.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                  <div className="text-sm opacity-90 mb-2">{stat.label}</div>
-                  <div className="text-xs opacity-75 mb-2">{stat.description}</div>
-                  <div className={`flex items-center justify-center text-xs ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}>
-                    {stat.trendUp ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                    {stat.trend}
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Wall of Avatars */}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {AVATARS.map((src, i) => (
+              <img key={i} src={src} alt="User avatar" className="w-12 h-12 rounded-full border-2 border-white/30 shadow-md object-cover hover:scale-110 transition-transform duration-200" loading="lazy" />
             ))}
+            <span className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-bold border-2 border-white/30 shadow-md text-xs">+2,800</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {platformStats.map((stat, i) => {
+              // Animated counter for numbers
+              const value = useCountUp(stat.value.replace(/[^0-9]/g, ''), 1200 + i * 300);
+              const display = stat.value.includes('%') ? value + '%' : stat.value.includes('$') ? '$' + value : value;
+              return (
+                <Card key={i} className="text-center border-none bg-neutral-900/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/30 flex items-center justify-center shadow-glow">
+                      <stat.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="text-3xl font-bold mb-2">
+                      {display}
+                    </div>
+                    <div className="text-sm opacity-90 mb-2">{stat.label}</div>
+                    <div className="text-xs opacity-75 mb-2">{stat.description}</div>
+                    <div className={`flex items-center justify-center text-xs ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}> 
+                      {stat.trendUp ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                      {stat.trend}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Content Types Section */}
-      <section className="py-20 px-4 bg-black/90">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative py-24 px-4 bg-black/90 overflow-hidden">
+        {/* Gradient Accent */}
+        <svg className="absolute -bottom-16 left-0 w-1/2 h-64 z-0" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
+          <ellipse cx="300" cy="100" rx="300" ry="100" fill="#a78bfa33" />
+        </svg>
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               What Our Creators Share
@@ -476,17 +611,20 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Discover the diverse content types that are thriving on ConnectUS
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {contentTypes.map((content, i) => (
-              <Card key={i} className="border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${content.color} flex items-center justify-center mb-4`}>
-                    <content.icon className="w-6 h-6 text-white" />
+              <Card key={i} className={`border-none bg-gradient-to-tr ${content.color} relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 rounded-3xl transform hover:scale-105 group`}>
+                {/* Background image */}
+                <img src={CONTENT_TYPE_IMAGES[i]} alt={content.type} className="absolute inset-0 w-full h-full object-cover object-center opacity-20 group-hover:opacity-30 transition duration-300 z-0" loading="lazy" />
+                <CardContent className="relative p-8 z-10 flex flex-col items-center">
+                  <div className={`w-14 h-14 rounded-full bg-black/40 flex items-center justify-center mb-4 shadow-glow border-2 border-white/20`}>
+                    <content.icon className="w-7 h-7 text-white drop-shadow-glow" />
                   </div>
-                  <h4 className="text-lg font-bold text-white mb-2">{content.type}</h4>
-                  <p className="text-sm text-white/70">{content.count}</p>
+                  <h4 className="text-lg font-bold text-white mb-2 drop-shadow-glow">{content.type}</h4>
+                  <p className="text-sm text-white/80">{content.count}</p>
                 </CardContent>
+                {/* Glass shine effect */}
+                <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 rounded-3xl blur-2xl pointer-events-none" />
               </Card>
             ))}
           </div>
@@ -494,8 +632,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 bg-gradient-to-tr from-primary/80 to-secondary/80">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative py-24 px-4 bg-gradient-to-tr from-primary/80 to-secondary/80 overflow-hidden">
+        {/* Glassy Accent */}
+        <svg className="absolute -top-16 left-0 w-1/2 h-64 z-0" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
+          <ellipse cx="300" cy="100" rx="300" ry="100" fill="#fff3" />
+        </svg>
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Real Creators, Real Earnings
@@ -504,17 +646,19 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Meet the creators who are already earning significant rewards on ConnectUS
             </p>
           </div>
-          
+          {/* Carousel Controls */}
+          <div className="flex justify-end gap-2 mb-4">
+            <button onClick={prevTestimonial} className="bg-white/20 hover:bg-white/40 text-primary rounded-full w-10 h-10 flex items-center justify-center shadow-md transition"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+            <button onClick={nextTestimonial} className="bg-white/20 hover:bg-white/40 text-primary rounded-full w-10 h-10 flex items-center justify-center shadow-md transition"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, i) => (
-              <Card key={i} className="border-none bg-neutral-900/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                <CardContent className="p-6">
+            {visibleTestimonials.map((testimonial, i) => (
+              <Card key={i} className="border-none bg-white/10 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 rounded-3xl relative overflow-hidden group">
+                <CardContent className="p-8 flex flex-col h-full">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold mr-4">
-                      {testimonial.avatar}
-                    </div>
+                    <img src={TESTIMONIAL_AVATARS[(testimonialIndex + i) % TESTIMONIAL_AVATARS.length]} alt={testimonial.name} className="w-14 h-14 rounded-full border-2 border-white/30 shadow-md object-cover mr-4" loading="lazy" />
                     <div className="flex-1">
-                      <div className="font-bold text-white">{testimonial.name}</div>
+                      <div className="font-bold text-white text-lg">{testimonial.name}</div>
                       <div className="text-sm text-white/70">{testimonial.role}</div>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
@@ -526,14 +670,20 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="text-sm text-white/70 mb-2">{testimonial.content}</div>
-                  
-                  <div className="flex items-center gap-2 text-xs text-white/70">
+                  {/* Star Ratings */}
+                  <div className="flex items-center mb-2">
+                    {[...Array(testimonial.rating)].map((_, idx) => (
+                      <svg key={idx} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.04 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+                    ))}
+                  </div>
+                  <div className="text-sm text-white/80 mb-2 flex-1">{testimonial.content}</div>
+                  <div className="flex items-center gap-2 text-xs text-white/70 mt-2">
                     <testimonial.icon className="w-4 h-4" />
                     <span>{testimonial.contentType}</span>
                   </div>
                 </CardContent>
+                {/* Glass shine effect */}
+                <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 rounded-3xl blur-2xl pointer-events-none" />
               </Card>
             ))}
           </div>
@@ -541,10 +691,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-black/90">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <div className="mb-8">
-            <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
+      <section className="relative py-24 px-4 bg-gradient-to-tr from-indigo-900 via-purple-900 to-black overflow-hidden">
+        {/* Mascot/celebration illustration */}
+        <img src={CTA_IMAGE} alt="Celebration" className="absolute right-8 bottom-0 w-64 h-64 object-contain opacity-80 z-0 pointer-events-none hidden md:block" loading="lazy" />
+        <div className="max-w-4xl mx-auto text-center text-white relative z-10">
+          <div className="mb-12">
+            <Crown className="w-16 h-16 mx-auto mb-4 text-primary animate-float" />
             <h3 className="text-3xl font-bold mb-4 drop-shadow-glow">
               Ready to Start Earning?
             </h3>
@@ -552,43 +704,40 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
               Join 2,847+ creators already earning CU tokens. Create your account now and start building your permanent online presence while getting paid for quality content.
             </p>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
-              <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
+              <Zap className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
               <h4 className="font-bold mb-2 text-white">Start Earning Immediately</h4>
               <p className="text-sm opacity-75 text-white/70">Earn your first CU tokens within minutes of joining</p>
             </div>
-            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
-              <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
+              <Shield className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
               <h4 className="font-bold mb-2 text-white">Own Your Content Forever</h4>
               <p className="text-sm opacity-75 text-white/70">Your posts are permanently stored on the blockchain</p>
             </div>
-            <div className="p-6 bg-neutral-900/80 rounded-xl backdrop-blur-md">
-              <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
+            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md shadow-xl">
+              <Users className="w-8 h-8 mx-auto mb-2 text-primary animate-bounce" />
               <h4 className="font-bold mb-2 text-white">Join Growing Community</h4>
               <p className="text-sm opacity-75 text-white/70">Connect with creators who share your values</p>
             </div>
           </div>
-          
           <Button 
-            className="h-12 text-lg bg-gradient-to-tr from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-bold shadow-lg rounded-xl"
+            className="h-16 px-12 text-2xl bg-gradient-to-tr from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-bold shadow-2xl rounded-2xl border-2 border-white/30 animate-pulse focus:ring-4 focus:ring-primary/40 focus:outline-none mb-4 mt-2"
             onClick={handleConnect}
             disabled={isConnecting}
           >
             {isConnecting ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 Creating Your Account...
               </>
             ) : (
               <>
-                <Gift className="mr-2 h-5 w-5" />
+                <Gift className="mr-2 h-6 w-6" />
                 Create Account & Start Earning
               </>
             )}
           </Button>
-          
           <p className="text-sm opacity-75 mt-4 text-white/70">
             Free to join • No personal data required • Start earning immediately
           </p>
@@ -596,28 +745,39 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Team Section */}
-      <section className="mt-24 mb-12">
-        <Card className="max-w-3xl mx-auto bg-neutral-900">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white text-center">Meet the Team</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-white mb-2">AG</div>
-                <div className="font-semibold text-lg text-white">Aryan Gupta</div>
-                <div className="text-sm text-white/70">Team Lead, Fullstack & Smart Contract Engineer</div>
-                <div className="text-xs text-white/70 mt-1">- Platform architecture<br/>- Motoko backend<br/>- Token rewards<br/>- UI/UX direction</div>
+      <section className="relative mt-32 mb-16 py-16 px-4 bg-gradient-to-tr from-black via-neutral-900 to-black overflow-hidden">
+        {/* Gradient Accent */}
+        <svg className="absolute -top-16 right-0 w-1/2 h-64 z-0" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents:'none'}}>
+          <ellipse cx="300" cy="100" rx="300" ry="100" fill="#a78bfa22" />
+        </svg>
+        <div className="max-w-3xl mx-auto relative z-10">
+          <Card className="bg-white/10 backdrop-blur-xl shadow-2xl rounded-3xl border-none">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-white text-center drop-shadow-glow mb-2 animate-fade-in-stagger">Meet the Team</CardTitle>
+              <p className="text-center text-white/70 mb-4 animate-fade-in-stagger">The builders behind ConnectUS</p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+                {/* Aryan Gupta */}
+                <div className="flex flex-col items-center bg-white/10 rounded-2xl p-6 shadow-lg w-full md:w-1/2 animate-fade-in-stagger">
+                  <img src={TEAM_AVATARS[0]} alt="Aryan Gupta" className="w-20 h-20 rounded-full border-2 border-white/30 shadow-md object-cover mb-2" loading="lazy" />
+                  <div className="font-semibold text-lg text-white">Aryan Gupta</div>
+                  <span className="inline-block bg-gradient-to-tr from-primary to-secondary text-white text-xs font-bold px-3 py-1 rounded-full mt-1 mb-2">Team Lead</span>
+                  <div className="text-sm text-white/70 mb-2">Fullstack & Smart Contract Engineer</div>
+                  <div className="text-xs text-white/60 text-center">- Platform architecture<br/>- Motoko backend<br/>- Token rewards<br/>- UI/UX direction</div>
+                </div>
+                {/* Arnav Jhalani */}
+                <div className="flex flex-col items-center bg-white/10 rounded-2xl p-6 shadow-lg w-full md:w-1/2 animate-fade-in-stagger">
+                  <img src={TEAM_AVATARS[1]} alt="Arnav Jhalani" className="w-20 h-20 rounded-full border-2 border-white/30 shadow-md object-cover mb-2" loading="lazy" />
+                  <div className="font-semibold text-lg text-white">Arnav Jhalani</div>
+                  <span className="inline-block bg-gradient-to-tr from-secondary to-primary text-white text-xs font-bold px-3 py-1 rounded-full mt-1 mb-2">Frontend Dev</span>
+                  <div className="text-sm text-white/70 mb-2">Frontend Developer</div>
+                  <div className="text-xs text-white/60 text-center">- React UI<br/>- Page layouts<br/>- Component design<br/>- Accessibility</div>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-3xl font-bold text-white mb-2">AJ</div>
-                <div className="font-semibold text-lg text-white">Arnav Jhalani</div>
-                <div className="text-sm text-white/70">Frontend Developer</div>
-                <div className="text-xs text-white/70 mt-1">- React UI<br/>- Page layouts<br/>- Component design<br/>- Accessibility</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </section>
 
       {/* Floating Chat Box - clean, no border */}
