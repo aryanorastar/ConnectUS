@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +47,9 @@ import {
   Smile,
   ThumbsUp,
   Eye,
-  BarChart3
+  BarChart3,
+  MessageCircle as ChatIcon,
+  X as CloseIcon
 } from 'lucide-react';
 
 import heroBackground from '@/assets/hero-bg.jpg';
@@ -59,6 +61,13 @@ interface WalletConnectionProps {
 export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
   const { login, isAuthenticated } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+
+  // Animate hero section on mount
+  useEffect(() => {
+    document.body.classList.add('overflow-x-hidden');
+    return () => document.body.classList.remove('overflow-x-hidden');
+  }, []);
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -237,12 +246,19 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black relative overflow-x-hidden">
+      {/* Animated background gradient */}
+      <div className="fixed inset-0 z-0 pointer-events-none animate-gradient-x bg-gradient-to-tr from-purple-900 via-black to-indigo-900 opacity-60 blur-2xl" />
       <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-900 to-black opacity-90"></div>
-        <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
+        {/* Floating ConnectUS logo */}
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-10 animate-float">
+          <div className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center shadow-2xl">
+            <span className="text-white text-4xl font-extrabold tracking-widest drop-shadow-glow">CU</span>
+          </div>
+        </div>
+        <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16 animate-fade-in-stagger">
           <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
             The Social Platform That
             <span className="text-primary"> Pays You Back</span>
@@ -553,6 +569,46 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           </CardContent>
         </Card>
       </section>
+
+      {/* Floating Chat Box */}
+      <div className="fixed bottom-8 right-8 z-50">
+        {!showChat ? (
+          <button
+            className="bg-gradient-to-tr from-primary to-secondary p-4 rounded-full shadow-xl hover:scale-110 transition-transform focus:outline-none"
+            onClick={() => setShowChat(true)}
+            aria-label="Open chat"
+          >
+            <ChatIcon className="w-7 h-7 text-white" />
+          </button>
+        ) : (
+          <div className="w-80 bg-neutral-900 border border-primary rounded-2xl shadow-2xl flex flex-col animate-fade-in-up">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-primary/30 bg-gradient-to-tr from-primary/30 to-secondary/20 rounded-t-2xl">
+              <span className="font-bold text-white text-lg">ConnectUS Chat</span>
+              <button onClick={() => setShowChat(false)} className="text-white hover:text-primary focus:outline-none">
+                <CloseIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-80">
+              <div className="bg-primary/20 rounded-lg p-3 text-white">Hi! 👋 How can we help you?</div>
+              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
+                What is ConnectUS?
+              </button>
+              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
+                How do I earn CU tokens?
+              </button>
+              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
+                Is my content really permanent?
+              </button>
+              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
+                How do I get started?
+              </button>
+            </div>
+            <div className="px-4 py-3 border-t border-primary/30 bg-neutral-900 rounded-b-2xl text-xs text-white/60 text-center">
+              Powered by ConnectUS FAQ
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
