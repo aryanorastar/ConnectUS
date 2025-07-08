@@ -182,6 +182,21 @@ For issues and questions:
 2. Visit [ICP Community Forum](https://forum.dfinity.org/)
 3. Join [ICP Discord](https://discord.gg/cA7y6ezyE2)
 
+## 🎨 Design & Accessibility
+- **Dark Mode by Default:** The entire app uses a dark theme for reduced eye strain and modern aesthetics. All backgrounds and text use theme-aware classes for perfect contrast.
+- **Unified Design System:** Headers, navigation, and all major UI elements are visually consistent across all pages (Landing, Feed, Explore, Rewards, Profile).
+- **Accessible Components:** All interactive elements have high-contrast colors, large tap targets, and clear focus states. Placeholder text and labels meet WCAG AA contrast standards.
+- **Consistent Progress Bars:** A reusable ProgressBar component ensures all progress indicators are thick, visible, and accessible everywhere (Profile, Achievements, Dashboard, etc.).
+- **Leaderboard Table:** The Rewards/Leaderboard page uses a proper grid-based table for perfect alignment, clear hierarchy, and mobile accessibility. The "What is this?" link is now readable and easy to tap.
+- **Sidebar Improvements:** Explore and Profile sidebars are decluttered, with clear labels, uniform buttons, and no ambiguous icons.
+
+## 🖼️ Updated Features
+- **Modern Dark UI:** All pages and cards adapt to dark mode, with no white-on-white or low-contrast issues.
+- **Accessible Navigation:** Headers, buttons, and links are large, bold, and easy to use on all devices.
+- **Leaderboard:** Now a visually distinct, accessible table with clear columns and headers.
+- **Profile & Achievements:** Progress bars are thick, colored, and labeled for clarity. Stats have text labels, not just icons.
+- **Explore:** Sidebars are clean, with uniform filter buttons and readable contributor lists.
+
 ---
 
 Built with ❤️ on the Internet Computer Protocol
