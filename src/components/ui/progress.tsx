@@ -23,21 +23,21 @@ const Progress = React.forwardRef<
         <span>{Math.round(value)}/{max}</span>
       </div>
     )}
-    <ProgressPrimitive.Root
-      ref={ref}
+  <ProgressPrimitive.Root
+    ref={ref}
       max={max}
-      className={cn(
+    className={cn(
         "relative w-full overflow-hidden rounded-full bg-secondary/60",
         height,
-        className
-      )}
-      {...props}
-    >
-      <ProgressPrimitive.Indicator
+      className
+    )}
+    {...props}
+  >
+    <ProgressPrimitive.Indicator
         className={cn("transition-all", colorClass, "rounded-full", height)}
-        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-      />
-    </ProgressPrimitive.Root>
+      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+    />
+  </ProgressPrimitive.Root>
   </div>
 ))
 Progress.displayName = ProgressPrimitive.Root.displayName

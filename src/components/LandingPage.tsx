@@ -290,6 +290,15 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
     <div className="min-h-screen bg-black relative overflow-x-hidden">
       {/* Animated background gradient */}
       <div className="fixed inset-0 z-0 pointer-events-none animate-gradient-x bg-gradient-to-tr from-purple-900 via-black to-indigo-900 opacity-60 blur-2xl" />
+      {/* White Glow Background - now above the gradient */}
+      <div className="fixed inset-0 z-10 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+          <div className="w-[140vw] h-[140vh] bg-white opacity-40 blur-4xl rounded-full mx-auto my-auto" style={{
+            background: 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.3) 60%, transparent 100%)',
+            filter: 'blur(120px)'
+          }} />
+        </div>
+      </div>
       <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
@@ -300,57 +309,57 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           </div>
           <div className="text-center space-y-8 max-w-6xl mx-auto py-16 animate-fade-in-stagger">
             <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
-              The Social Platform That
-              <span className="text-primary"> Pays You Back</span>
-            </h2>
+            The Social Platform That
+            <span className="text-primary"> Pays You Back</span>
+          </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-              Share your world, earn CU tokens for quality content, and own your digital identity forever. 
-              Join 2,847+ creators already earning real rewards while building their permanent online presence.
-            </p>
+            Share your world, earn CU tokens for quality content, and own your digital identity forever. 
+            Join 2,847+ creators already earning real rewards while building their permanent online presence.
+          </p>
             <div className="flex items-center justify-center space-x-8 text-sm text-white/60">
-              <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4" />
-                <span>2,847+ active creators</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <DollarSign className="w-4 h-4" />
-                <span>$12,456+ in rewards distributed</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Shield className="w-4 h-4" />
-                <span>100% censorship-resistant</span>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>2,847+ active creators</span>
             </div>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-4 h-4" />
+              <span>$12,456+ in rewards distributed</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4" />
+              <span>100% censorship-resistant</span>
+            </div>
+          </div>
             <Card className="max-w-lg mx-auto border-none bg-neutral-900/90 backdrop-blur-lg shadow-2xl rounded-2xl">
-              <CardHeader className="text-center">
+            <CardHeader className="text-center">
                 <CardTitle className="text-2xl mb-2 font-bold text-white">Start Earning Today</CardTitle>
                 <p className="text-white/70">
-                  Create your account and earn your first CU tokens in minutes
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
+                Create your account and earn your first CU tokens in minutes
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
                   className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl"
-                  onClick={handleConnect}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Creating Your Account...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-5 w-5" />
-                      Create Account & Start Earning
-                    </>
-                  )}
-                </Button>
+                onClick={handleConnect}
+                disabled={isConnecting}
+              >
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating Your Account...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Create Account & Start Earning
+                  </>
+                )}
+              </Button>
                 <p className="text-xs text-white/60 text-center">
-                  Free to join • Start earning immediately • No personal data required
-                </p>
-              </CardContent>
-            </Card>
+                Free to join • Start earning immediately • No personal data required
+              </p>
+            </CardContent>
+          </Card>
           </div>
         </div>
       </section>

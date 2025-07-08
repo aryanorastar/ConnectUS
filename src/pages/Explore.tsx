@@ -605,10 +605,10 @@ const Explore = () => {
                   
                   {/* Popular Categories */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-orange-500" />
-                      <span className="text-sm font-medium">Popular Categories</span>
-                    </div>
+                                         <div className="flex items-center gap-2">
+                       <Flame className="w-4 h-4 text-orange-500" />
+                       <span className="text-sm font-medium">Popular Categories</span>
+                     </div>
                     <div className="space-y-2">
                       <Button
                         variant={selectedCategory === 'all' ? 'default' : 'outline'}
@@ -751,30 +751,30 @@ const Explore = () => {
                           <TooltipTrigger asChild>
                             <div className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-help border border-transparent hover:border-primary/20">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="relative">
-                                  <Avatar className="w-10 h-10">
-                                    <AvatarImage src={user.avatar} />
-                                    <AvatarFallback className="text-xs">
-                                      {user.displayName[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  {isActive && (
-                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                                  )}
-                                </div>
+                              <div className="relative">
+                                <Avatar className="w-10 h-10">
+                                  <AvatarImage src={user.avatar} />
+                                  <AvatarFallback className="text-xs">
+                                    {user.displayName[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {isActive && (
+                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
+                                )}
+                              </div>
                                 <div className="flex flex-col min-w-0">
-                                  <div className="flex items-center gap-1">
-                                    <p className="font-medium text-sm truncate">{user.displayName}</p>
+                                <div className="flex items-center gap-1">
+                                  <p className="font-medium text-sm truncate">{user.displayName}</p>
                                     <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`}/>
-                                  </div>
-                                  <p className="text-xs text-gray-400 truncate">@{user.username}</p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>{user.followers} followers</span>
-                                    <span>•</span>
-                                    <span>{user.cuEarned} CU</span>
-                                  </div>
-                                  <p className="text-xs text-primary mt-1 truncate">{user.recentActivity}</p>
                                 </div>
+                                  <p className="text-xs text-gray-400 truncate">@{user.username}</p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>{user.followers} followers</span>
+                                  <span>•</span>
+                                  <span>{user.cuEarned} CU</span>
+                                </div>
+                                <p className="text-xs text-primary mt-1 truncate">{user.recentActivity}</p>
+                              </div>
                               </div>
                               <Button size="sm" variant="outline" className="ml-4 flex-shrink-0">Follow</Button>
                             </div>
