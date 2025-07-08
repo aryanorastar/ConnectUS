@@ -240,19 +240,21 @@ export const OnboardingGuide = () => {
                 </CardDescription>
               </div>
             </div>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-sm text-gray-100 font-semibold">
               {Math.round(progress)}% Complete
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Progress value={progress} className="h-2" />
-          
+          <div className="flex items-center gap-2">
+            <Progress value={progress} className="h-2 flex-1" />
+            <span className="text-sm text-gray-100 font-semibold ml-2">{Math.round(progress)}% Complete</span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {onboardingSteps.map((step, index) => (
               <div
                 key={step.id}
-                className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 ${
+                className={`flex items-center gap-4 p-3 rounded-lg border transition-all duration-200 ${
                   step.completed
                     ? 'bg-success/10 border-success/20 text-success'
                     : index === currentStep
@@ -280,25 +282,12 @@ export const OnboardingGuide = () => {
               </div>
             ))}
           </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTokenGuide(true)}
-              className="text-xs"
-            >
-              <Gift className="w-3 h-3 mr-1" />
-              Learn About CU Tokens
-            </Button>
-            
-            <Button
-              size="sm"
-              onClick={() => setShowGuide(true)}
-              className="btn-primary text-xs"
-            >
-              <BookOpen className="w-3 h-3 mr-1" />
+          <div className="flex gap-4 mt-4">
+            <Button className="bg-primary text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-primary/90 transition-all" onClick={() => setShowGuide(true)}>
               View Full Guide
+            </Button>
+            <Button variant="outline" className="border-primary text-primary font-semibold px-6 py-2 rounded-lg hover:bg-primary/10 transition-all" onClick={() => setShowTokenGuide(true)}>
+              Learn About CU Tokens
             </Button>
           </div>
         </CardContent>

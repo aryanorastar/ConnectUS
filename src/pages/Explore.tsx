@@ -593,7 +593,7 @@ const Explore = () => {
                             variant={filterByContent === type.id ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setFilterByContent(type.id)}
-                            className="justify-start text-xs"
+                            className="content-type-btn"
                           >
                             <IconComponent className="w-3 h-3 mr-1" />
                             {type.label}
@@ -605,34 +605,32 @@ const Explore = () => {
                   
                   {/* Popular Categories */}
                   <div className="space-y-2">
-                                         <div className="flex items-center gap-2">
-                       <Flame className="w-4 h-4 text-orange-500" />
-                       <span className="text-sm font-medium">Popular Categories</span>
-                     </div>
+                    <div className="flex items-center gap-2">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm font-medium">Popular Categories</span>
+                    </div>
                     <div className="space-y-2">
                       <Button
                         variant={selectedCategory === 'all' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setSelectedCategory('all')}
-                        className="w-full justify-start"
+                        className="w-full justify-start category-btn"
                       >
                         <Globe className="w-4 h-4 mr-2" />
                         All Categories
+                        <span className="ml-auto text-xs text-muted-foreground font-normal">({posts.length})</span>
                       </Button>
-                      
                       {getPopularCategories().map((category) => (
                         <Button
                           key={category.id}
                           variant={selectedCategory === category.id ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setSelectedCategory(category.id)}
-                          className="w-full justify-start"
+                          className="w-full justify-start category-btn"
                         >
                           <category.icon className="w-4 h-4 mr-2" />
                           {category.name}
-                          <Badge variant="secondary" className="ml-auto text-xs">
-                            {category.postCount}
-                          </Badge>
+                          <span className="ml-auto text-xs text-muted-foreground font-normal">({category.postCount})</span>
                         </Button>
                       ))}
                     </div>
@@ -744,41 +742,41 @@ const Explore = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {suggestedUsers.map((user) => {
                       const LevelIcon = getUserLevelIcon(user.level);
                       const isActive = Date.now() - user.lastActive < 300000; // 5 minutes
                       return (
                         <Tooltip key={user.id}>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-help border border-transparent hover:border-primary/20">
-                              <div className="relative">
-                                <Avatar className="w-10 h-10">
-                                  <AvatarImage src={user.avatar} />
-                                  <AvatarFallback className="text-xs">
-                                    {user.displayName[0]}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {isActive && (
-                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1">
-                                  <p className="font-medium text-sm truncate">{user.displayName}</p>
-                                  <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
+                            <div className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-help border border-transparent hover:border-primary/20">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative">
+                                  <Avatar className="w-10 h-10">
+                                    <AvatarImage src={user.avatar} />
+                                    <AvatarFallback className="text-xs">
+                                      {user.displayName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  {isActive && (
+                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
+                                  )}
                                 </div>
-                                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <span>{user.followers} followers</span>
-                                  <span>•</span>
-                                  <span>{user.cuEarned} CU</span>
+                                <div className="flex flex-col min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <p className="font-medium text-sm truncate">{user.displayName}</p>
+                                    <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`}/>
+                                  </div>
+                                  <p className="text-xs text-gray-400 truncate">@{user.username}</p>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>{user.followers} followers</span>
+                                    <span>•</span>
+                                    <span>{user.cuEarned} CU</span>
+                                  </div>
+                                  <p className="text-xs text-primary mt-1 truncate">{user.recentActivity}</p>
                                 </div>
-                                <p className="text-xs text-primary mt-1 truncate">{user.recentActivity}</p>
                               </div>
-                              <Button size="sm" variant="outline">
-                                Follow
-                              </Button>
+                              <Button size="sm" variant="outline" className="ml-4 flex-shrink-0">Follow</Button>
                             </div>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
@@ -786,7 +784,7 @@ const Explore = () => {
                               <p className="font-medium">{user.displayName}</p>
                               <p className="text-sm text-muted-foreground">{user.bio}</p>
                               <div className="flex items-center gap-1">
-                                <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`} />
+                                <LevelIcon className={`w-3 h-3 ${getUserLevelColor(user.level)}`}/>
                                 <span className="text-xs">{user.level}</span>
                               </div>
                               <div className="text-xs space-y-1">

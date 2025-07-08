@@ -425,3 +425,10 @@ html, body {
     page-break-before: always;
   }
 }
+
+.content-type-btn {
+  @apply px-3 py-1.5 text-xs rounded-md font-medium leading-tight w-full justify-start;
+}
+.category-btn {
+  @apply px-3 py-1.5 text-xs rounded-md font-medium leading-tight w-full justify-start;
+}

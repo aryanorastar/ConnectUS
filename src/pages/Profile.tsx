@@ -734,11 +734,11 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm font-semibold">
                         <span>Complete your profile</span>
                         <span>{profileCompletion}%</span>
                       </div>
-                      <Progress value={profileCompletion} className="h-2" />
+                      <Progress value={profileCompletion} max={100} height="h-3" colorClass="bg-primary" label={null} />
                     </div>
                     <div className="text-xs text-muted-foreground space-y-1">
                       {!profile?.bio && <p>• Add a bio to tell others about yourself</p>}
@@ -776,7 +776,7 @@ const Profile = () => {
                     </div>
                     <div className="text-center p-3 bg-muted/30 rounded-lg">
                       <div className="text-2xl font-bold text-primary">{userStats.posts}</div>
-                      <div className="text-sm text-muted-foreground">Posts Created</div>
+                      <div className="text-sm text-muted-foreground">Posts</div>
                     </div>
                   </div>
                   
@@ -895,14 +895,13 @@ const Profile = () => {
                         </p>
                         <p className="text-xs text-muted-foreground">{achievement.description}</p>
                         {achievement.progress !== undefined && achievement.maxProgress && (
-                          <div className="mt-1">
-                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                              <span>Progress</span>
-                              <span>{achievement.progress}/{achievement.maxProgress}</span>
-                            </div>
+                          <div className="mt-2">
                             <Progress 
-                              value={(achievement.progress / achievement.maxProgress) * 100} 
-                              className="h-1" 
+                              value={Math.min((achievement.progress / achievement.maxProgress) * 100, 100)} 
+                              max={100}
+                              height="h-3"
+                              colorClass={achievement.unlocked ? "bg-green-600" : "bg-primary"}
+                              label={<span className="font-semibold text-sm">{achievement.progress}/{achievement.maxProgress}</span>}
                             />
                           </div>
                         )}

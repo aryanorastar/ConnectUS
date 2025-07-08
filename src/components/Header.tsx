@@ -158,8 +158,8 @@ export const Header = ({
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-border shadow-sm safe-area-top">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md border-b border-border shadow-sm safe-area-top">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           {showLogo && (
             <Link to={isAuthenticated ? "/feed" : "/"} className="flex items-center space-x-3 group">
@@ -200,11 +200,11 @@ export const Header = ({
           {showSearch && isAuthenticated && (
             <form onSubmit={handleSearch} className="hidden md:flex items-center ml-6 transition-all duration-300">
               <div className={`relative flex items-center ${isSearchFocused ? 'w-80' : 'w-64'}`}>
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search ConnectUS..."
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-muted/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 placeholder:text-gray-400"
                   value={searchValue}
                   onChange={e => setSearchValue(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
@@ -226,7 +226,7 @@ export const Header = ({
           )}
 
           {/* Desktop Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-4 pr-0 md:pr-0">
             {showQuickPost && isAuthenticated && (
               <Button
                 className="btn-accent hidden md:inline-flex"
@@ -256,7 +256,7 @@ export const Header = ({
             {showUserMenu && isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" className="flex items-center">
                     <Avatar className="w-8 h-8">
                       <AvatarFallback className="bg-gradient-to-tr from-primary to-secondary text-white text-sm">
                         {identity?.getPrincipal().toText().slice(0, 2).toUpperCase()}

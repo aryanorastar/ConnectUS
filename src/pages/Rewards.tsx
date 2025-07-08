@@ -51,7 +51,7 @@ const Rewards = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
             </div>
           ) : leaderboard.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center bg-white/70 rounded-2xl shadow-lg border border-indigo-100">
+            <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-2xl shadow-lg border border-border">
               <div className="mb-6">
                 <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto text-yellow-400">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 21h8M12 17v4m8-16v2a4 4 0 01-4 4H8a4 4 0 01-4-4V5m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2m16 0v2a4 4 0 01-4 4H8a4 4 0 01-4-4V5" />
@@ -66,13 +66,25 @@ const Rewards = () => {
               </div>
             </div>
           ) : (
-            leaderboard.map((user, i) => (
-              <div key={i} className="rounded-2xl bg-white/80 shadow-lg p-6 flex items-center gap-4 border border-indigo-100 hover:shadow-2xl transition-all">
-                <span className="text-2xl font-bold text-indigo-600">#{i + 1}</span>
-                <span className="ml-2 font-semibold text-indigo-700">{user.username}</span>
-                <span className="ml-auto text-lg text-purple-700 font-bold">{user.totalRewards} T4T</span>
+            <div className="overflow-x-auto rounded-2xl shadow-lg border border-border bg-card">
+              <div className="grid grid-cols-3 grid-rows-1 bg-muted/20 border-b border-border font-semibold text-foreground text-lg" style={{gridTemplateColumns: '1fr 3fr 2fr'}}>
+                <div className="px-6 py-4">Rank</div>
+                <div className="px-6 py-4 flex items-center gap-2">
+                  User
+                  <a href="#" className="ml-2 text-primary underline underline-offset-2 text-base font-medium hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded transition-all" style={{minWidth: 'max-content'}}>
+                    What is this?
+                  </a>
+                </div>
+                <div className="px-6 py-4 text-right">Total Rewards</div>
               </div>
-            ))
+              {leaderboard.map((user, i) => (
+                <div key={i} className="grid grid-cols-3 items-center border-b border-border last:border-0" style={{gridTemplateColumns: '1fr 3fr 2fr'}}>
+                  <div className="px-6 py-4 text-2xl font-bold text-indigo-500">#{i + 1}</div>
+                  <div className="px-6 py-4 font-semibold text-foreground">{user.username}</div>
+                  <div className="px-6 py-4 text-lg text-purple-400 font-bold text-right">{user.totalRewards} T4T</div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

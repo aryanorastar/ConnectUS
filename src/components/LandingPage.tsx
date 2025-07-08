@@ -241,7 +241,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-400/20 via-purple-300/20 to-pink-200/20"></div>
+        <div className="absolute inset-0 bg-background/80"></div>
         <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16">
           <h2 className="text-5xl font-bold text-foreground leading-tight max-w-4xl mx-auto">
             The Social Platform That
@@ -270,16 +270,16 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           </div>
 
           {/* CTA Button */}
-          <Card className="max-w-lg mx-auto border-none bg-white/80 backdrop-blur-lg shadow-2xl">
+          <Card className="max-w-lg mx-auto border-none bg-card/90 backdrop-blur-lg shadow-2xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl mb-2 font-bold">Start Earning Today</CardTitle>
+              <CardTitle className="text-2xl mb-2 font-bold text-card-foreground">Start Earning Today</CardTitle>
               <p className="text-muted-foreground">
                 Create your account and earn your first CU tokens in minutes
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button 
-                className="w-full h-12 text-lg bg-gradient-to-tr from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg rounded-xl"
+                className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-bold shadow-lg rounded-xl"
                 onClick={handleConnect}
                 disabled={isConnecting}
               >
@@ -317,12 +317,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, i) => (
-              <Card key={i} className="text-center border-none bg-white/60 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="text-center border-none bg-card/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 flex items-center justify-center`}>
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center`}>
                     <feature.icon className={`w-8 h-8 ${feature.color}`} />
                   </div>
-                  <h4 className="text-xl font-bold text-foreground mb-2">{feature.title}</h4>
+                  <h4 className="text-xl font-bold text-card-foreground mb-2">{feature.title}</h4>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -332,7 +332,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4 bg-white/50">
+      <section className="py-20 px-4 bg-background/90">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
@@ -346,15 +346,15 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {howItWorksSteps.map((step, i) => (
               <div key={i} className="relative">
-                <Card className="text-center border-none bg-white/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className="text-center border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-8">
                     <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${step.color} flex items-center justify-center shadow-lg`}>
-                      <step.icon className="w-10 h-10 text-white" />
+                      <step.icon className="w-10 h-10 text-primary-foreground" />
                     </div>
                     <Badge variant="outline" className="mb-4 text-sm font-bold">
                       Step {step.step}
                     </Badge>
-                    <h4 className="text-2xl font-bold text-foreground mb-4">{step.title}</h4>
+                    <h4 className="text-2xl font-bold text-card-foreground mb-4">{step.title}</h4>
                     <p className="text-muted-foreground leading-relaxed">{step.description}</p>
                   </CardContent>
                 </Card>
@@ -385,15 +385,15 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {platformStats.map((stat, i) => (
-              <Card key={i} className="text-center border-none bg-gradient-to-tr from-indigo-500 to-purple-500 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="text-center border-none bg-card/90 text-card-foreground shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center">
-                    <stat.icon className="w-8 h-8" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+                    <stat.icon className="w-8 h-8 text-primary" />
                   </div>
                   <div className="text-3xl font-bold mb-2">{stat.value}</div>
                   <div className="text-sm opacity-90 mb-2">{stat.label}</div>
                   <div className="text-xs opacity-75 mb-2">{stat.description}</div>
-                  <div className={`flex items-center justify-center text-xs ${stat.trendUp ? 'text-green-200' : 'text-red-200'}`}>
+                  <div className={`flex items-center justify-center text-xs ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}>
                     {stat.trendUp ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                     {stat.trend}
                   </div>
@@ -405,7 +405,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Content Types Section */}
-      <section className="py-20 px-4 bg-white/50">
+      <section className="py-20 px-4 bg-background/90">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-foreground mb-4">
@@ -418,12 +418,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {contentTypes.map((content, i) => (
-              <Card key={i} className="border-none bg-white/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${content.color} flex items-center justify-center mb-4`}>
-                    <content.icon className="w-6 h-6 text-white" />
+                    <content.icon className="w-6 h-6 text-primary-foreground" />
                   </div>
-                  <h4 className="text-lg font-bold text-foreground mb-2">{content.type}</h4>
+                  <h4 className="text-lg font-bold text-card-foreground mb-2">{content.type}</h4>
                   <p className="text-sm text-muted-foreground">{content.count}</p>
                 </CardContent>
               </Card>
@@ -433,10 +433,10 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-gradient-to-tr from-primary/80 to-secondary/80">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-foreground mb-4">
+            <h3 className="text-4xl font-bold text-card-foreground mb-4">
               Real Creators, Real Earnings
             </h3>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -446,42 +446,31 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, i) => (
-              <Card key={i} className="border-none bg-white/80 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={i} className="border-none bg-card/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-400 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    <div className="w-12 h-12 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold mr-4">
                       {testimonial.avatar}
                     </div>
                     <div className="flex-1">
-                      <div className="font-bold text-foreground">{testimonial.name}</div>
+                      <div className="font-bold text-card-foreground">{testimonial.name}</div>
                       <div className="text-sm text-muted-foreground">{testimonial.role}</div>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {testimonial.badge}
                         </Badge>
-                        <Badge variant="outline" className="text-xs text-green-600">
+                        <Badge variant="outline" className="text-xs text-green-400">
                           {testimonial.earnings}
                         </Badge>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center mb-3">
-                    <testimonial.icon className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="text-xs text-muted-foreground">{testimonial.contentType}</span>
-                  </div>
+                  <div className="text-sm text-muted-foreground mb-2">{testimonial.content}</div>
                   
-                  <p className="text-muted-foreground mb-4 leading-relaxed">{testimonial.content}</p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                    <div className="text-sm font-bold text-green-600">
-                      {testimonial.earnings}
-                    </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <testimonial.icon className="w-4 h-4" />
+                    <span>{testimonial.contentType}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -491,38 +480,38 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-tr from-indigo-500 to-purple-500">
-        <div className="max-w-4xl mx-auto text-center text-white">
+      <section className="py-20 px-4 bg-background/90">
+        <div className="max-w-4xl mx-auto text-center text-card-foreground">
           <div className="mb-8">
-            <Crown className="w-16 h-16 mx-auto mb-4" />
+            <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
             <h3 className="text-3xl font-bold mb-4">
               Ready to Start Earning?
             </h3>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+            <p className="text-xl opacity-90 max-w-2xl mx-auto text-muted-foreground">
               Join 2,847+ creators already earning CU tokens. Create your account now and start building your permanent online presence while getting paid for quality content.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
-              <Zap className="w-8 h-8 mx-auto mb-2" />
-              <h4 className="font-bold mb-2">Start Earning Immediately</h4>
-              <p className="text-sm opacity-75">Earn your first CU tokens within minutes of joining</p>
+            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+              <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+              <h4 className="font-bold mb-2 text-card-foreground">Start Earning Immediately</h4>
+              <p className="text-sm opacity-75 text-muted-foreground">Earn your first CU tokens within minutes of joining</p>
             </div>
-            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
-              <Shield className="w-8 h-8 mx-auto mb-2" />
-              <h4 className="font-bold mb-2">Own Your Content Forever</h4>
-              <p className="text-sm opacity-75">Your posts are permanently stored on the blockchain</p>
+            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+              <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
+              <h4 className="font-bold mb-2 text-card-foreground">Own Your Content Forever</h4>
+              <p className="text-sm opacity-75 text-muted-foreground">Your posts are permanently stored on the blockchain</p>
             </div>
-            <div className="p-6 bg-white/10 rounded-xl backdrop-blur-md">
-              <Users className="w-8 h-8 mx-auto mb-2" />
-              <h4 className="font-bold mb-2">Join Growing Community</h4>
-              <p className="text-sm opacity-75">Connect with creators who share your values</p>
+            <div className="p-6 bg-card/80 rounded-xl backdrop-blur-md">
+              <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
+              <h4 className="font-bold mb-2 text-card-foreground">Join Growing Community</h4>
+              <p className="text-sm opacity-75 text-muted-foreground">Connect with creators who share your values</p>
             </div>
           </div>
           
           <Button 
-            className="h-12 text-lg bg-white text-indigo-600 hover:bg-gray-100 font-bold shadow-lg rounded-xl"
+            className="h-12 text-lg bg-gradient-to-tr from-primary to-secondary text-primary-foreground hover:from-primary/90 hover:to-secondary/90 font-bold shadow-lg rounded-xl"
             onClick={handleConnect}
             disabled={isConnecting}
           >
@@ -539,7 +528,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
             )}
           </Button>
           
-          <p className="text-sm opacity-75 mt-4">
+          <p className="text-sm opacity-75 mt-4 text-muted-foreground">
             Free to join • No personal data required • Start earning immediately
           </p>
         </div>

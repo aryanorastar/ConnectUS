@@ -123,7 +123,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Rich text formatting toolbar */}
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-4 mb-1">
             <Button type="button" size="icon" variant="ghost" onClick={() => handleFormat('bold')} title="Bold"><Bold className="w-4 h-4" /></Button>
             <Button type="button" size="icon" variant="ghost" onClick={() => handleFormat('italic')} title="Italic"><Italic className="w-4 h-4" /></Button>
             <Button type="button" size="icon" variant="ghost" onClick={() => handleFormat('list')} title="List"><List className="w-4 h-4" /></Button>
@@ -189,7 +189,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
             <Button 
               type="submit" 
               disabled={!content.trim() || isPosting}
-              className="bg-gradient-primary hover:bg-gradient-secondary transition-all duration-300 min-w-[100px]"
+              className="bg-[#6C47FF] text-white font-bold transition-all duration-300 min-w-[120px] rounded-lg shadow hover:bg-[#5a38d6]"
             >
               {isPosting ? (
                 <div className="flex items-center space-x-2">
@@ -197,7 +197,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
                   <span>Posting...</span>
                 </div>
               ) : (
-                'Post to Chain'
+                'Post On-chain'
               )}
             </Button>
           </div>
