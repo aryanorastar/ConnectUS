@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +49,8 @@ import {
   Eye,
   BarChart3,
   MessageCircle as ChatIcon,
-  X as CloseIcon
+  X as CloseIcon,
+  Send as SendIcon
 } from 'lucide-react';
 
 import heroBackground from '@/assets/hero-bg.jpg';
@@ -62,6 +63,12 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
   const { login, isAuthenticated } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatHistory, setChatHistory] = useState([
+    { from: 'bot', text: 'Hi! 👋 How can we help you?' }
+  ]);
+  const [isBotTyping, setIsBotTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Animate hero section on mount
   useEffect(() => {
@@ -80,6 +87,40 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       setIsConnecting(false);
     }
   };
+
+  // Chat bot logic
+  const standardAnswers: Record<string, string> = {
+    'what is connectus': 'ConnectUS is a decentralized social platform where you own your content, earn CU tokens, and connect with a global community. All posts are permanent and censorship-resistant!',
+    'how do i earn cu tokens': 'You earn CU tokens by creating quality posts, engaging with others, and receiving likes from the community. The more value you add, the more you earn!',
+    'is my content really permanent': 'Yes! All your posts are stored immutably on the blockchain. No one can delete or alter your content—not even us.',
+    'how do i get started': "Just connect your Internet Identity and start posting! You'll earn tokens and build your profile from day one.",
+    'gm': 'gm fren! ☀️ Wishing you a productive day on ConnectUS!',
+    'hello': 'Hello! 👋 How can I assist you today?'
+  };
+  const quickReplies = [
+    'What is ConnectUS?',
+    'How do I earn CU tokens?',
+    'Is my content really permanent?',
+    'How do I get started?'
+  ];
+  const handleSend = (msg?: string) => {
+    const userMsg = (msg || chatInput).trim();
+    if (!userMsg) return;
+    setChatHistory(h => [...h, { from: 'user', text: userMsg }]);
+    setChatInput('');
+    setIsBotTyping(true);
+    setTimeout(() => {
+      const key = userMsg.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+      const answer = standardAnswers[key] || "I'm not sure yet, but our team will get back to you soon!";
+      setChatHistory(h => [...h, { from: 'bot', text: answer }]);
+      setIsBotTyping(false);
+    }, 1200);
+  };
+  useEffect(() => {
+    if (showChat && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatHistory, showChat, isBotTyping]);
 
   const features = [
     {
@@ -252,65 +293,65 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <Header showNav={false} showSearch={false} showQuickPost={false} showNotifications={false} showUserMenu={false} showLogo={true} />
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
-        {/* Floating ConnectUS logo */}
-        <div className="absolute left-1/2 top-32 md:top-20 -translate-x-1/2 z-20 animate-float w-full flex justify-center pointer-events-none">
-          <div className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center shadow-2xl">
+        <div className="relative flex flex-col items-center z-20">
+          {/* CU Logo - clean, no border */}
+          <div className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center shadow-2xl mb-6">
             <span className="text-white text-4xl font-extrabold tracking-widest drop-shadow-glow">CU</span>
           </div>
-        </div>
-        <div className="relative text-center space-y-8 max-w-6xl mx-auto z-10 py-16 animate-fade-in-stagger">
-          <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
-            The Social Platform That
-            <span className="text-primary"> Pays You Back</span>
-          </h2>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-            Share your world, earn CU tokens for quality content, and own your digital identity forever. 
-            Join 2,847+ creators already earning real rewards while building their permanent online presence.
-          </p>
-          <div className="flex items-center justify-center space-x-8 text-sm text-white/60">
-            <div className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>2,847+ active creators</span>
+          <div className="text-center space-y-8 max-w-6xl mx-auto py-16 animate-fade-in-stagger">
+            <h2 className="text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto drop-shadow-glow">
+              The Social Platform That
+              <span className="text-primary"> Pays You Back</span>
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+              Share your world, earn CU tokens for quality content, and own your digital identity forever. 
+              Join 2,847+ creators already earning real rewards while building their permanent online presence.
+            </p>
+            <div className="flex items-center justify-center space-x-8 text-sm text-white/60">
+              <div className="flex items-center space-x-2">
+                <Users className="w-4 h-4" />
+                <span>2,847+ active creators</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <DollarSign className="w-4 h-4" />
+                <span>$12,456+ in rewards distributed</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4" />
+                <span>100% censorship-resistant</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <DollarSign className="w-4 h-4" />
-              <span>$12,456+ in rewards distributed</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Shield className="w-4 h-4" />
-              <span>100% censorship-resistant</span>
-            </div>
+            <Card className="max-w-lg mx-auto border-none bg-neutral-900/90 backdrop-blur-lg shadow-2xl rounded-2xl">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl mb-2 font-bold text-white">Start Earning Today</CardTitle>
+                <p className="text-white/70">
+                  Create your account and earn your first CU tokens in minutes
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl"
+                  onClick={handleConnect}
+                  disabled={isConnecting}
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating Your Account...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Create Account & Start Earning
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-white/60 text-center">
+                  Free to join • Start earning immediately • No personal data required
+                </p>
+              </CardContent>
+            </Card>
           </div>
-          <Card className="max-w-lg mx-auto border-none bg-neutral-900/90 backdrop-blur-lg shadow-2xl rounded-2xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl mb-2 font-bold text-white">Start Earning Today</CardTitle>
-              <p className="text-white/70">
-                Create your account and earn your first CU tokens in minutes
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                className="w-full h-12 text-lg bg-gradient-to-tr from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg rounded-xl"
-                onClick={handleConnect}
-                disabled={isConnecting}
-              >
-                {isConnecting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating Your Account...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Create Account & Start Earning
-                  </>
-                )}
-              </Button>
-              <p className="text-xs text-white/60 text-center">
-                Free to join • Start earning immediately • No personal data required
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
@@ -570,8 +611,8 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         </Card>
       </section>
 
-      {/* Floating Chat Box */}
-      <div className="fixed bottom-8 right-8 z-50">
+      {/* Floating Chat Box - clean, no border */}
+      <div className="fixed bottom-8 right-8 z-[9999]">
         {!showChat ? (
           <button
             className="bg-gradient-to-tr from-primary to-secondary p-4 rounded-full shadow-xl hover:scale-110 transition-transform focus:outline-none"
@@ -583,27 +624,54 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         ) : (
           <div className="w-80 bg-neutral-900 border border-primary rounded-2xl shadow-2xl flex flex-col animate-fade-in-up">
             <div className="flex items-center justify-between px-4 py-3 border-b border-primary/30 bg-gradient-to-tr from-primary/30 to-secondary/20 rounded-t-2xl">
-              <span className="font-bold text-white text-lg">ConnectUS Chat</span>
+              <span className="font-bold text-white text-lg flex items-center gap-2">
+                <span className="inline-block w-7 h-7 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-bold">CU</span>
+                ConnectUS Chat
+              </span>
               <button onClick={() => setShowChat(false)} className="text-white hover:text-primary focus:outline-none">
                 <CloseIcon className="w-5 h-5" />
               </button>
             </div>
             <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-80">
-              <div className="bg-primary/20 rounded-lg p-3 text-white">Hi! 👋 How can we help you?</div>
-              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
-                What is ConnectUS?
-              </button>
-              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
-                How do I earn CU tokens?
-              </button>
-              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
-                Is my content really permanent?
-              </button>
-              <button className="w-full text-left bg-neutral-800 hover:bg-primary/20 rounded-lg p-3 text-white/90 transition" onClick={() => {}}>
-                How do I get started?
-              </button>
+              {chatHistory.map((msg, i) => (
+                <div key={i} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`rounded-lg px-4 py-2 max-w-[80%] text-sm shadow ${msg.from === 'user' ? 'bg-primary text-white' : 'bg-neutral-800 text-white/90'} animate-fade-in-up`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {isBotTyping && (
+                <div className="flex justify-start">
+                  <div className="rounded-lg px-4 py-2 max-w-[80%] bg-neutral-800 text-white/90 flex items-center gap-2 animate-fade-in-up">
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce delay-150" />
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce delay-300" />
+                    <span className="ml-2 text-xs">Typing…</span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
             </div>
-            <div className="px-4 py-3 border-t border-primary/30 bg-neutral-900 rounded-b-2xl text-xs text-white/60 text-center">
+            <div className="px-4 pb-3">
+              <div className="flex gap-2 mb-2 flex-wrap">
+                {quickReplies.map(q => (
+                  <button key={q} className="bg-primary/20 text-white/80 rounded-full px-3 py-1 text-xs hover:bg-primary/40 transition" onClick={() => handleSend(q)}>{q}</button>
+                ))}
+              </div>
+              <form className="flex gap-2" onSubmit={e => { e.preventDefault(); handleSend(); }}>
+                <input
+                  className="flex-1 rounded-lg bg-neutral-800 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Type your question…"
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  disabled={isBotTyping}
+                />
+                <Button type="submit" size="icon" className="bg-primary text-white hover:bg-primary/80" disabled={!chatInput.trim() || isBotTyping}>
+                  <SendIcon className="w-4 h-4" />
+                </Button>
+              </form>
+            </div>
+            <div className="px-4 py-2 border-t border-primary/30 bg-neutral-900 rounded-b-2xl text-xs text-white/60 text-center">
               Powered by ConnectUS FAQ
             </div>
           </div>
