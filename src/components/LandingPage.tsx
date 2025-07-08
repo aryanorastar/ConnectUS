@@ -469,7 +469,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4 bg-black/90">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-white mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               What Our Creators Share
             </h3>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
@@ -497,7 +497,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
       <section className="py-20 px-4 bg-gradient-to-tr from-primary/80 to-secondary/80">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-white mb-4">
+            <h3 className="text-4xl font-bold text-white mb-4 drop-shadow-glow">
               Real Creators, Real Earnings
             </h3>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
@@ -545,7 +545,7 @@ export const LandingPage = ({ onConnect }: WalletConnectionProps) => {
         <div className="max-w-4xl mx-auto text-center text-white">
           <div className="mb-8">
             <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
-            <h3 className="text-3xl font-bold mb-4">
+            <h3 className="text-3xl font-bold mb-4 drop-shadow-glow">
               Ready to Start Earning?
             </h3>
             <p className="text-xl opacity-90 max-w-2xl mx-auto text-white/70">
