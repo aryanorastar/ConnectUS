@@ -117,7 +117,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
             <AvatarImage src="/placeholder.svg" />
             <AvatarFallback className="bg-gradient-primary text-primary-foreground">ME</AvatarFallback>
           </Avatar>
-          <span className="text-lg">Share your thoughts on-chain</span>
+          <span className="text-lg text-foreground">Share your thoughts on-chain</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -145,7 +145,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
                 placeholder="What's happening in the decentralized world?"
                 value={content}
                 onChange={handleContentChange}
-                className="min-h-[120px] resize-none border-border focus:border-primary transition-colors w-full rounded-md p-3 text-base"
+                className="min-h-[120px] resize-none border-border focus:border-primary transition-colors w-full rounded-md p-3 text-base text-foreground placeholder:text-muted-foreground bg-background"
                 maxLength={characterLimit}
                 data-post-form-input
               />
@@ -168,7 +168,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
           ) : (
             <div className="bg-muted/40 rounded p-4 border border-border">
               <div className="mb-2 text-muted-foreground text-xs">Preview</div>
-              <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>') }} />
+              <div className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>') }} />
               {mediaPreview && (
                 <div className="mt-3 relative inline-block">
                   <img src={mediaPreview} alt="preview" className="h-32 rounded border" />
@@ -179,7 +179,7 @@ export const PostForm = ({ onPost }: PostFormProps) => {
           )}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs text-foreground border-muted-foreground bg-background">
                 Permanent • Immutable
               </Badge>
               <span className={`text-xs ${remainingChars < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>
